@@ -48,48 +48,51 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
   ];
 
   return (
-    <div className="w-64 bg-white shadow-lg h-full">
-      <div className="p-6 border-b">
-        <div className="flex items-center space-x-2">
-          <div className="bg-[hsl(43,96%,56%)] text-white px-3 py-2 rounded font-bold text-lg">
+    <div className="w-64 bg-white shadow-lg h-full flex flex-col">
+      <div className="p-6 border-b flex-shrink-0">
+        <div className="flex items-center space-x-3">
+          <div className="bg-[hsl(43,96%,56%)] text-white px-3 py-2 rounded-lg font-bold text-lg">
             MIR
           </div>
           <div>
-            <div className="font-medium text-gray-900">Church CMS</div>
+            <div className="font-semibold text-gray-900">Church CMS</div>
             <div className="text-sm text-gray-500">Admin Panel</div>
           </div>
         </div>
       </div>
 
-      <nav className="p-4">
-        <ul className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <li key={item.id}>
-                <Button
-                  variant={activeTab === item.id ? "default" : "ghost"}
-                  className={`w-full justify-start ${
-                    activeTab === item.id 
-                      ? "bg-[hsl(43,96%,56%)] text-white" 
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() => setActiveTab(item.id)}
-                >
-                  <Icon className="h-4 w-4 mr-2" />
-                  {item.label}
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
+      <nav className="flex-1 overflow-y-auto">
+        <div className="p-4">
+          <ul className="space-y-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.id}>
+                  <Button
+                    variant={activeTab === item.id ? "default" : "ghost"}
+                    size="sm"
+                    className={`w-full justify-start text-sm font-medium transition-colors ${
+                      activeTab === item.id 
+                        ? "bg-[hsl(43,96%,56%)] text-white hover:bg-[hsl(43,96%,50%)]" 
+                        : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
+                    onClick={() => setActiveTab(item.id)}
+                  >
+                    <Icon className="h-4 w-4 mr-3 flex-shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </nav>
 
-      <div className="absolute bottom-4 left-4 right-4">
+      <div className="p-4 border-t flex-shrink-0">
         <Link href="/">
-          <Button variant="outline" className="w-full justify-start">
-            <LogOut className="h-4 w-4 mr-2" />
-            Back to Site
+          <Button variant="outline" size="sm" className="w-full justify-start text-sm">
+            <LogOut className="h-4 w-4 mr-3" />
+            Voltar ao Site
           </Button>
         </Link>
       </div>

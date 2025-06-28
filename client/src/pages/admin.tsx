@@ -61,16 +61,22 @@ export default function Admin() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50">
       <MetaTags {...generatePageMeta('admin')} />
       <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Church CMS Admin</h1>
-            <p className="text-gray-600">Manage your church website content</p>
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6 md:p-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Church CMS Admin</h1>
+                <p className="text-gray-600 mt-1">Gerencie o conteúdo da sua igreja</p>
+              </div>
+              <div className="min-h-0">
+                {renderContent()}
+              </div>
+            </div>
           </div>
-          {renderContent()}
         </div>
       </main>
     </div>
