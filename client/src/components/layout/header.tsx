@@ -83,9 +83,50 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Tablet Navigation with Horizontal Scroll */}
+          <div className="hidden md:flex lg:hidden flex-1 justify-center relative">
+            <div className="overflow-x-auto scrollbar-hide horizontal-scroll max-w-full">
+              <div className="flex items-center space-x-6 px-4 py-2 min-w-max">
+                {organizedMenuItems.map((item) => (
+                  item.children && item.children.length > 0 ? (
+                    <DropdownMenu key={item.id}>
+                      <DropdownMenuTrigger className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium flex items-center whitespace-nowrap text-sm">
+                        {item.title} <ChevronDown className="ml-1 h-4 w-4" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        {item.children.map((child) => (
+                          <DropdownMenuItem key={child.id}>
+                            <Link href={child.url}>{child.title}</Link>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <Link
+                      key={item.id}
+                      href={item.url}
+                      className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium whitespace-nowrap text-sm"
+                    >
+                      {item.title}
+                    </Link>
+                  )
+                ))}
+                
+                <Link href="/admin">
+                  <Button variant="outline" size="sm" className="whitespace-nowrap">
+                    Admin
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            {/* Gradient indicators for scroll */}
+            <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+          </div>
+
+          {/* Mobile Menu Button - only on small screens */}
           <button
-            className="lg:hidden text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)]"
+            className="md:hidden text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)]"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -94,8 +135,8 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t">
-            <div className="space-y-4">
+          <div className="md:hidden py-4 border-t">
+            <div className="space-y-4 max-h-96 overflow-y-auto">
               {organizedMenuItems.map((item) => (
                 item.children && item.children.length > 0 ? (
                   <div key={item.id} className="space-y-2">
