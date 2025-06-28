@@ -483,18 +483,35 @@ async function seed() {
       }
     ]);
 
-    // 18. Create Menu Items
+    // 18. Create Menu Items (conforme as imagens)
     console.log("🧭 Creating menu items...");
     await db.insert(menuItems).values([
-      { title: "Início", url: "/", parentId: null, order: 1, isActive: true, icon: "home" },
-      { title: "Sobre", url: "/sobre", parentId: null, order: 2, isActive: true, icon: "info" },
-      { title: "Nossa História", url: "/sobre/historia", parentId: 2, order: 1, isActive: true },
-      { title: "Equipe Pastoral", url: "/sobre/equipe", parentId: 2, order: 2, isActive: true },
-      { title: "Serviços", url: "/servicos", parentId: null, order: 3, isActive: true, icon: "calendar" },
-      { title: "Ensinos", url: "/ensinos", parentId: null, order: 4, isActive: true, icon: "book" },
-      { title: "Eventos", url: "/eventos", parentId: null, order: 5, isActive: true, icon: "calendar-days" },
-      { title: "Blog", url: "/blog", parentId: null, order: 6, isActive: true, icon: "pen-tool" },
-      { title: "Contato", url: "/contato", parentId: null, order: 7, isActive: true, icon: "phone" }
+      // Menus principais
+      { id: 1, title: "Início", url: "/", parentId: null, order: 1, isActive: true, icon: "home" },
+      { id: 2, title: "Sobre", url: "/sobre", parentId: null, order: 2, isActive: true, icon: "info" },
+      { id: 6, title: "Serviços", url: "/servicos", parentId: null, order: 3, isActive: true, icon: "calendar" },
+      { id: 7, title: "Ensino", url: "/ensino", parentId: null, order: 4, isActive: true, icon: "book" },
+      { id: 10, title: "Plataforma de ensino", url: "/plataforma-ensino", parentId: null, order: 5, isActive: true, icon: "graduation-cap" },
+      { id: 18, title: "Eventos e Blogs", url: "/eventos-blogs", parentId: null, order: 6, isActive: true, icon: "calendar-days" },
+      { id: 19, title: "Contacto", url: "/contato", parentId: null, order: 7, isActive: true, icon: "phone" },
+      
+      // Submenus do Sobre
+      { id: 3, title: "Ministério", url: "/sobre/ministerio", parentId: 2, order: 1, isActive: true },
+      { id: 4, title: "No que Cremos", url: "/sobre/cremos", parentId: 2, order: 2, isActive: true },
+      { id: 5, title: "Presidente do MIR", url: "/sobre/presidente", parentId: 2, order: 3, isActive: true },
+      
+      // Submenus do Ensino
+      { id: 8, title: "Audio", url: "/ensino/audio", parentId: 7, order: 1, isActive: true },
+      { id: 9, title: "Video", url: "/ensino/video", parentId: 7, order: 2, isActive: true },
+      
+      // Submenus da Plataforma de ensino
+      { id: 11, title: "Conferencia da Fé", url: "/plataforma-ensino/conferencia-fe", parentId: 10, order: 1, isActive: true },
+      { id: 12, title: "Escola de Fundação", url: "/plataforma-ensino/escola-fundacao", parentId: 10, order: 2, isActive: true },
+      { id: 13, title: "Conferencia de Ministros", url: "/plataforma-ensino/conferencia-ministros", parentId: 10, order: 3, isActive: true },
+      { id: 14, title: "Conferencia de Mulheres", url: "/plataforma-ensino/conferencia-mulheres", parentId: 10, order: 4, isActive: true },
+      { id: 15, title: "Conferencia dos Jovens", url: "/plataforma-ensino/conferencia-jovens", parentId: 10, order: 5, isActive: true },
+      { id: 16, title: "Mulheres Transformadas", url: "/plataforma-ensino/mulheres-transformadas", parentId: 10, order: 6, isActive: true },
+      { id: 17, title: "Reis e Sacerdotes", url: "/plataforma-ensino/reis-sacerdotes", parentId: 10, order: 7, isActive: true }
     ]);
 
     // 19. Create Landing Page Sections
