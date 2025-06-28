@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp, numeric } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -293,3 +294,26 @@ export type InsertNewsletterSubscriber = z.infer<typeof insertNewsletterSubscrib
 
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;
+
+// Relations
+export const eventsRelations = relations(events, ({ many }) => ({
+  registrations: many(eventRegistrations),
+}));
+
+export const eventRegistrationsRelations = relations(eventRegistrations, ({ one }) => ({
+  event: one(events, {
+    fields: [eventRegistrations.eventId],
+    references: [events.id],
+  }),
+}));
+
+export const donationsRelations = relations(donations, ({ one }) => ({
+  campaign: one(donationCampaigns, {
+    fields: [donations.campaignId],
+    references: [donationCampaigns.id],
+  }),
+}));
+
+export const donationCampaignsRelations = relations(donationCampaigns, ({ many }) => ({
+  donations: many(donations),
+}));
