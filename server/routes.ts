@@ -299,10 +299,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(registrations);
   });
 
-  app.post("/api/events/:eventId/register", async (req, res) => {
+  app.post("/api/event-registrations", async (req, res) => {
     try {
-      const eventId = parseInt(req.params.eventId);
-      const registration = insertEventRegistrationSchema.parse({ ...req.body, eventId });
+      const registration = insertEventRegistrationSchema.parse(req.body);
       const newRegistration = await storage.createEventRegistration(registration);
       res.json(newRegistration);
     } catch (error) {
@@ -501,7 +500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(subscribers);
   });
 
-  app.post("/api/newsletter-subscribe", async (req, res) => {
+  app.post("/api/newsletter-subscribers", async (req, res) => {
     try {
       const subscriber = insertNewsletterSubscriberSchema.parse(req.body);
       const newSubscriber = await storage.createNewsletterSubscriber(subscriber);
@@ -520,6 +519,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!unsubscribed) {
       return res.status(404).json({ error: "Subscriber not found" });
     }
+    res.json({ success: true });
+  });
+
+  // Authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password are required" });
+    }
+
+    try {
+      const user = await storage.getUserByUsername(username);
+      
+      if (!user || user.password !== password) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      // Generate a simple session token (in production, use proper JWT)
+      const token = `session_${user.id}_${Date.now()}`;
+      
+      res.json({
+        user: {
+          id: user.id,
+          username: user.username,
+          role: "admin" // Default role for now
+        },
+        token
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    // In a real app, invalidate the token
     res.json({ success: true });
   });
 

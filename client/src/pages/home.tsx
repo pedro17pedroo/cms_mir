@@ -6,6 +6,8 @@ import ServiceSchedule from "@/components/sections/service-schedule";
 import LatestMessages from "@/components/sections/latest-messages";
 import BibleVerse from "@/components/sections/bible-verse";
 import Testimonials from "@/components/sections/testimonials";
+import Newsletter from "@/components/sections/newsletter";
+import SocialMedia from "@/components/sections/social-media";
 
 export default function Home() {
   return (
@@ -18,6 +20,8 @@ export default function Home() {
         <LatestMessages />
         <BibleVerse />
         <Testimonials />
+        <SocialMedia />
+        <Newsletter />
       </main>
       <Footer />
     </div>

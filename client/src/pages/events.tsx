@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import EventRegistration from "@/components/forms/event-registration";
+import type { Event } from "@shared/schema";
 
 export default function Events() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -125,14 +128,17 @@ export default function Events() {
                     )}
                   </div>
                   
-                  {event.registrationLink && (
-                    <Button
-                      className="w-full mt-4 bg-[hsl(43,96%,56%)] hover:bg-[hsl(43,96%,46%)]"
-                      onClick={() => window.open(event.registrationLink, '_blank')}
-                    >
-                      Inscrever-se
-                    </Button>
-                  )}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="w-full mt-4 bg-[hsl(43,96%,56%)] hover:bg-[hsl(43,96%,46%)]">
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Inscrever-se
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <EventRegistration event={event} />
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             ))}
