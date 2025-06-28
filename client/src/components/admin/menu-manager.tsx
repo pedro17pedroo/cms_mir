@@ -23,11 +23,11 @@ export default function MenuManager({}: MenuManagerProps) {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: menuItems = [], isLoading } = useQuery({
+  const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
     queryKey: ["/api/menu-items"],
   });
 
-  const { data: pages = [] } = useQuery({
+  const { data: pages = [] } = useQuery<any[]>({
     queryKey: ["/api/pages"],
   });
 
@@ -44,10 +44,12 @@ export default function MenuManager({}: MenuManagerProps) {
   });
 
   const createMenuItemMutation = useMutation({
-    mutationFn: (data: InsertMenuItem) => apiRequest("/api/menu-items", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+    mutationFn: (data: InsertMenuItem) => 
+      fetch("/api/menu-items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-items"] });
       setIsDialogOpen(false);
@@ -61,10 +63,11 @@ export default function MenuManager({}: MenuManagerProps) {
 
   const updateMenuItemMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<InsertMenuItem> }) => 
-      apiRequest(`/api/menu-items/${id}`, {
+      fetch(`/api/menu-items/${id}`, {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }),
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-items"] });
       setIsDialogOpen(false);
@@ -78,9 +81,10 @@ export default function MenuManager({}: MenuManagerProps) {
   });
 
   const deleteMenuItemMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/menu-items/${id}`, {
-      method: "DELETE",
-    }),
+    mutationFn: (id: number) => 
+      fetch(`/api/menu-items/${id}`, {
+        method: "DELETE",
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-items"] });
       toast({ title: "Item de menu removido com sucesso!" });
@@ -263,8 +267,8 @@ export default function MenuManager({}: MenuManagerProps) {
                               <Input 
                                 type="number" 
                                 placeholder="0" 
-                                {...field}
                                 onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                value={field.value || 0}
                               />
                             </FormControl>
                             <FormMessage />
@@ -279,7 +283,7 @@ export default function MenuManager({}: MenuManagerProps) {
                           <FormItem>
                             <FormLabel>Ícone (opcional)</FormLabel>
                             <FormControl>
-                              <Input placeholder="nome-do-icone" {...field} />
+                              <Input placeholder="nome-do-icone" {...field} value={field.value || ""} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -295,7 +299,7 @@ export default function MenuManager({}: MenuManagerProps) {
                           <FormLabel>Ativo</FormLabel>
                           <FormControl>
                             <Switch
-                              checked={field.value}
+                              checked={Boolean(field.value)}
                               onCheckedChange={field.onChange}
                             />
                           </FormControl>
