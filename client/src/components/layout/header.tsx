@@ -41,13 +41,63 @@ export default function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem>
-                  <a href="/#visao">Nossa Visão</a>
+                  <Link href="/about">Ministério</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <a href="/#missao">Nossa Missão</a>
+                  <Link href="/about">No que Cremos</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <a href="/#cremos">O que Cremos</a>
+                  <Link href="/about">Presidente do MIR</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Link
+              href="/services"
+              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
+            >
+              Serviços
+            </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium flex items-center">
+                Ensino <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>
+                  <Link href="/teachings">Áudio</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/teachings">Vídeo</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium flex items-center">
+                Plataforma de ensino <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>
+                  <Link href="/events">Conferência da Fé</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/events">Escola de Fundação</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/events">Conferência de Ministros</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/events">Conferência de Mulheres</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/events">Conferência dos Jovens</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/events">Mulheres Transformadas</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/events">Reis e Sacerdotes</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -56,32 +106,16 @@ export default function Header() {
               href="/events"
               className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
             >
-              Eventos
+              Eventos e Blogs
             </Link>
+            
             <Link
-              href="/blog"
+              href="/contact"
               className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
             >
-              Blog
+              Contacto
             </Link>
-            <Link
-              href="/videos"
-              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
-            >
-              Vídeos
-            </Link>
-            <Link
-              href="/donations"
-              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
-            >
-              Doações
-            </Link>
-            <a
-              href="/#contato"
-              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
-            >
-              Contato
-            </a>
+            
             <Link href="/admin">
               <Button variant="outline" size="sm">
                 Admin
@@ -102,54 +136,92 @@ export default function Header() {
         {isMobileMenuOpen && (
           <div className="lg:hidden py-4 border-t">
             <div className="space-y-4">
-              <a
-                href="#inicio"
+              <Link
+                href="/"
                 className="block text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Início
-              </a>
-              <a
-                href="#visao"
+              </Link>
+              
+              <div className="space-y-2">
+                <div className="font-medium text-[hsl(210,11%,15%)]">Sobre</div>
+                <div className="pl-4 space-y-2">
+                  <Link href="/about" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Ministério
+                  </Link>
+                  <Link href="/about" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    No que Cremos
+                  </Link>
+                  <Link href="/about" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Presidente do MIR
+                  </Link>
+                </div>
+              </div>
+
+              <Link
+                href="/services"
                 className="block text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] font-medium"
-              >
-                Nossa Visão
-              </a>
-              <a
-                href="#missao"
-                className="block text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] font-medium"
-              >
-                Nossa Missão
-              </a>
-              <a
-                href="#cremos"
-                className="block text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] font-medium"
-              >
-                O que Cremos
-              </a>
-              <a
-                href="#servicos"
-                className="block text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Serviços
-              </a>
-              <a
-                href="#ensinos"
+              </Link>
+
+              <div className="space-y-2">
+                <div className="font-medium text-[hsl(210,11%,15%)]">Ensino</div>
+                <div className="pl-4 space-y-2">
+                  <Link href="/teachings" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Áudio
+                  </Link>
+                  <Link href="/teachings" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Vídeo
+                  </Link>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="font-medium text-[hsl(210,11%,15%)]">Plataforma de ensino</div>
+                <div className="pl-4 space-y-2">
+                  <Link href="/events" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Conferência da Fé
+                  </Link>
+                  <Link href="/events" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Escola de Fundação
+                  </Link>
+                  <Link href="/events" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Conferência de Ministros
+                  </Link>
+                  <Link href="/events" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Conferência de Mulheres
+                  </Link>
+                  <Link href="/events" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Conferência dos Jovens
+                  </Link>
+                  <Link href="/events" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Mulheres Transformadas
+                  </Link>
+                  <Link href="/events" className="block text-sm text-gray-600 hover:text-[hsl(43,96%,56%)]" onClick={() => setIsMobileMenuOpen(false)}>
+                    Reis e Sacerdotes
+                  </Link>
+                </div>
+              </div>
+
+              <Link
+                href="/events"
                 className="block text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] font-medium"
-              >
-                Ensinos
-              </a>
-              <a
-                href="#eventos"
-                className="block text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Eventos e Blogs
-              </a>
-              <a
-                href="#contato"
+              </Link>
+              
+              <Link
+                href="/contact"
                 className="block text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                Contato
-              </a>
+                Contacto
+              </Link>
+              
               <Link href="/admin">
                 <Button variant="outline" size="sm" className="w-full">
                   Admin
