@@ -10,6 +10,10 @@ import Events from "@/pages/events";
 import Blog from "@/pages/blog";
 import Videos from "@/pages/videos";
 import Donations from "@/pages/donations";
+import About from "@/pages/about";
+import Services from "@/pages/services";
+import Teachings from "@/pages/teachings";
+import Contact from "@/pages/contact";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,10 +22,14 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/admin" component={Admin} />
       <Route path="/login" component={Login} />
+      <Route path="/sobre" component={About} />
+      <Route path="/servicos" component={Services} />
+      <Route path="/ensinos" component={Teachings} />
       <Route path="/eventos" component={Events} />
       <Route path="/blog" component={Blog} />
       <Route path="/videos" component={Videos} />
       <Route path="/doacoes" component={Donations} />
+      <Route path="/contato" component={Contact} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -558,6 +558,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  // Contact form route
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { name, email, phone, subject, message } = req.body;
+      
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ error: "Name, email, subject and message are required" });
+      }
+
+      // In a real app, you would:
+      // 1. Save the contact message to database
+      // 2. Send email to administrators
+      // 3. Send auto-reply to user
+      
+      // For now, just log the contact attempt
+      console.log("Contact form submission:", { name, email, subject, message, phone });
+      
+      res.json({ success: true, message: "Mensagem enviada com sucesso!" });
+    } catch (error) {
+      console.error("Contact form error:", error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Analytics route for admin dashboard
+  app.get("/api/analytics", async (req, res) => {
+    try {
+      // Get basic statistics
+      const [
+        totalEvents,
+        totalMessages,
+        totalTestimonials,
+        totalVideos,
+        totalSubscribers,
+        totalDonations
+      ] = await Promise.all([
+        storage.getEvents().then(events => events.length),
+        storage.getMessages().then(messages => messages.length),
+        storage.getTestimonials().then(testimonials => testimonials.length),
+        storage.getVideos().then(videos => videos.length),
+        storage.getNewsletterSubscribers().then(subs => subs.length),
+        storage.getDonations().then(donations => donations.length)
+      ]);
+
+      res.json({
+        totalEvents,
+        totalMessages,
+        totalTestimonials,
+        totalVideos,
+        totalSubscribers,
+        totalDonations,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Analytics error:", error);
+      res.status(500).json({ error: "Erro ao carregar analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

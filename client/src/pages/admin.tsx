@@ -6,6 +6,10 @@ import TestimonialManager from "@/components/admin/testimonial-manager";
 import MessageManager from "@/components/admin/message-manager";
 import AnalyticsDashboard from "@/components/admin/analytics-dashboard";
 import ContentManager from "@/components/admin/content-manager";
+import SocialMediaManager from "@/components/admin/social-media-manager";
+import StreamingManager from "@/components/admin/streaming-manager";
+import NewsletterManager from "@/components/admin/newsletter-manager";
+import DonationManager from "@/components/admin/donation-manager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import MetaTags, { generatePageMeta } from "@/components/seo/meta-tags";
 
@@ -15,62 +19,7 @@ export default function Admin() {
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-        return (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Hero Slides
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3</div>
-                <p className="text-xs text-muted-foreground">
-                  Active carousel slides
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Messages
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">
-                  Published messages
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Testimonials
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">8</div>
-                <p className="text-xs text-muted-foreground">
-                  Faith testimonies
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Service Times
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3</div>
-                <p className="text-xs text-muted-foreground">
-                  Weekly services
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        );
+        return <AnalyticsDashboard />;
       case "content":
         return <ContentEditor />;
       case "content-manager":
@@ -83,6 +32,14 @@ export default function Admin() {
         return <MessageManager />;
       case "analytics":
         return <AnalyticsDashboard />;
+      case "social-media":
+        return <SocialMediaManager />;
+      case "streaming":
+        return <StreamingManager />;
+      case "newsletter":
+        return <NewsletterManager />;
+      case "donations":
+        return <DonationManager />;
       default:
         return <ContentEditor />;
     }

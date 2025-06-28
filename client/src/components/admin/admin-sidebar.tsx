@@ -7,7 +7,13 @@ import {
   MessageSquare, 
   Heart,
   Settings,
-  LogOut
+  LogOut,
+  BarChart3,
+  Share2,
+  Video,
+  Mail,
+  DollarSign,
+  Users
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -18,11 +24,17 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
-    { id: "content", label: "Content", icon: FileText },
-    { id: "events", label: "Events", icon: Calendar },
-    { id: "messages", label: "Messages", icon: MessageSquare },
-    { id: "testimonials", label: "Testimonials", icon: Heart },
-    { id: "settings", label: "Settings", icon: Settings },
+    { id: "content", label: "Conteúdo", icon: FileText },
+    { id: "content-manager", label: "Gestor Conteúdo", icon: Users },
+    { id: "events", label: "Eventos", icon: Calendar },
+    { id: "messages", label: "Mensagens", icon: MessageSquare },
+    { id: "testimonials", label: "Testemunhos", icon: Heart },
+    { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "social-media", label: "Redes Sociais", icon: Share2 },
+    { id: "streaming", label: "Streaming", icon: Video },
+    { id: "newsletter", label: "Newsletter", icon: Mail },
+    { id: "donations", label: "Doações", icon: DollarSign },
+    { id: "settings", label: "Configurações", icon: Settings },
   ];
 
   return (
