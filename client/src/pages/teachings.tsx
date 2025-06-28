@@ -36,14 +36,14 @@ export default function Teachings() {
     );
   }
 
-  const filteredMessages = messages?.filter((message: any) => {
+  const filteredMessages = Array.isArray(messages) ? messages.filter((message: any) => {
     const matchesSearch = message.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          message.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "all" || message.category === selectedCategory;
     return matchesSearch && matchesCategory;
-  });
+  }) : [];
 
-  const categories = [...new Set(messages?.map((m: any) => m.category) || [])];
+  const categories = Array.isArray(messages) ? Array.from(new Set(messages.map((m: any) => m.category))) : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white">
@@ -73,25 +73,25 @@ export default function Teachings() {
                 <div className="grid md:grid-cols-3 gap-8 items-center">
                   <div className="md:col-span-1">
                     <img 
-                      src={featuredMessage.imageUrl} 
-                      alt={featuredMessage.title}
+                      src={(featuredMessage as any)?.imageUrl || '/placeholder-image.jpg'} 
+                      alt={(featuredMessage as any)?.title || 'Mensagem em destaque'}
                       className="w-full h-48 object-cover rounded-lg shadow-lg"
                     />
                   </div>
                   <div className="md:col-span-2 space-y-4">
                     <Badge className="bg-gold-100 text-gold-800">Destaque</Badge>
                     <h3 className="text-2xl md:text-3xl font-bold text-purple-800">
-                      {featuredMessage.title}
+                      {(featuredMessage as any)?.title || 'Título da mensagem'}
                     </h3>
                     <p className="text-gray-600 leading-relaxed">
-                      {featuredMessage.description}
+                      {(featuredMessage as any)?.description || 'Descrição da mensagem'}
                     </p>
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{featuredMessage.date}</span>
+                        <span>{(featuredMessage as any)?.date || new Date().toLocaleDateString('pt-BR')}</span>
                       </div>
-                      <Badge variant="outline">{featuredMessage.category}</Badge>
+                      <Badge variant="outline">{(featuredMessage as any)?.category || 'Categoria'}</Badge>
                     </div>
                     <div className="flex space-x-4">
                       <Button className="bg-purple-600 hover:bg-purple-700">

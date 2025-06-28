@@ -11,22 +11,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Video, Play, Calendar, Users, Settings, Plus, Edit, Trash2, Eye, Clock } from "lucide-react";
-
-interface StreamSchedule {
-  id: string;
-  title: string;
-  description: string;
-  scheduledTime: string;
-  youtubeId?: string;
-  isLive: boolean;
-  maxViewers: number;
-  currentViewers: number;
-}
+import { 
+  Video, 
+  Plus, 
+  Settings, 
+  BarChart3, 
+  Calendar, 
+  Users, 
+  Play, 
+  Pause, 
+  Square,
+  Eye,
+  Clock,
+  MessageCircle,
+  Share2
+} from "lucide-react";
 
 export default function StreamingManager() {
-  const [activeTab, setActiveTab] = useState("schedule");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("live");
+  const [isStreamDialogOpen, setIsStreamDialogOpen] = useState(false);
+  const [isLive, setIsLive] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -34,49 +38,79 @@ export default function StreamingManager() {
     title: "",
     description: "",
     scheduledTime: "",
-    youtubeId: ""
+    platform: "youtube"
   });
 
-  // Sample streaming data - in production this would come from database and YouTube API
-  const streamSchedules: StreamSchedule[] = [
+  // Sample streaming data
+  const streamingStats = {
+    currentViewers: 127,
+    totalViews: 2450,
+    peakViewers: 189,
+    streamDuration: "1h 23m",
+    chatMessages: 342,
+    likes: 78,
+    shares: 12
+  };
+
+  const scheduledStreams = [
     {
       id: "1",
-      title: "Culto de Domingo - Transformação",
-      description: "Mensagem especial sobre transformação através da fé",
-      scheduledTime: "2025-06-29T10:00:00",
-      youtubeId: "dQw4w9WgXcQ",
-      isLive: false,
-      maxViewers: 500,
-      currentViewers: 0
+      title: "Culto Dominical - Manhã",
+      description: "Culto de domingo pela manhã com louvor e palavra",
+      scheduledTime: "2025-06-29T09:00:00",
+      platform: "youtube",
+      status: "scheduled",
+      estimatedViewers: 150
     },
     {
       id: "2", 
-      title: "Estudo Bíblico - Quarta-feira",
-      description: "Explorando as Parábolas de Jesus - Capítulo 3",
-      scheduledTime: "2025-06-30T19:30:00",
-      isLive: false,
-      maxViewers: 200,
-      currentViewers: 0
+      title: "Estudo Bíblico - Quarta",
+      description: "Estudo da palavra com Pastor João",
+      scheduledTime: "2025-07-02T19:30:00",
+      platform: "facebook",
+      status: "scheduled",
+      estimatedViewers: 85
     },
     {
       id: "3",
-      title: "Vigília de Oração",
-      description: "Momento especial de intercessão e oração",
-      scheduledTime: "2025-07-01T21:00:00",
-      isLive: true,
-      maxViewers: 300,
-      currentViewers: 127
+      title: "Culto de Oração",
+      description: "Momento especial de oração e intercessão",
+      scheduledTime: "2025-07-01T20:00:00",
+      platform: "youtube",
+      status: "scheduled",
+      estimatedViewers: 120
     }
   ];
 
-  const streamingStats = {
-    totalStreams: 45,
-    totalViewers: 12350,
-    avgViewers: 275,
-    totalWatchTime: "2,450h",
-    subscribers: 890,
-    growthRate: 15.2
-  };
+  const recentStreams = [
+    {
+      id: "1",
+      title: "Culto Dominical - 23/06",
+      views: 245,
+      duration: "1h 45m",
+      date: "2025-06-23",
+      platform: "youtube",
+      engagement: 78.5
+    },
+    {
+      id: "2",
+      title: "Estudo Bíblico - 19/06", 
+      views: 156,
+      duration: "1h 15m",
+      date: "2025-06-19",
+      platform: "facebook",
+      engagement: 82.1
+    },
+    {
+      id: "3",
+      title: "Culto de Oração - 17/06",
+      views: 189,
+      duration: "1h 30m", 
+      date: "2025-06-17",
+      platform: "youtube",
+      engagement: 75.3
+    }
+  ];
 
   const handleCreateStream = () => {
     if (!newStream.title || !newStream.scheduledTime) {
@@ -88,30 +122,19 @@ export default function StreamingManager() {
       return;
     }
 
-    // In production, this would create a new stream in the database
-    toast({ title: "Transmissão agendada com sucesso!" });
-    setIsCreateDialogOpen(false);
-    setNewStream({ title: "", description: "", scheduledTime: "", youtubeId: "" });
+    toast({ title: "Stream agendada com sucesso!" });
+    setIsStreamDialogOpen(false);
+    setNewStream({ title: "", description: "", scheduledTime: "", platform: "youtube" });
   };
 
-  const handleGoLive = (streamId: string) => {
-    // In production, this would start the live stream
-    toast({ title: "Transmissão iniciada!" });
+  const handleStartStream = () => {
+    setIsLive(true);
+    toast({ title: "Stream iniciada!" });
   };
 
-  const handleEndStream = (streamId: string) => {
-    // In production, this would end the live stream
-    toast({ title: "Transmissão finalizada!" });
-  };
-
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const handleStopStream = () => {
+    setIsLive(false);
+    toast({ title: "Stream finalizada!" });
   };
 
   return (
@@ -119,147 +142,275 @@ export default function StreamingManager() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-purple-800">Gestão de Streaming</h2>
-          <p className="text-gray-600">Configure e monitore transmissões ao vivo</p>
+          <p className="text-gray-600">Controle suas transmissões ao vivo</p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-purple-600 hover:bg-purple-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Transmissão
+        <div className="flex space-x-2">
+          <Dialog open={isStreamDialogOpen} onOpenChange={setIsStreamDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Agendar Stream
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Agendar Nova Stream</DialogTitle>
+                <DialogDescription>
+                  Configure uma nova transmissão ao vivo
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="stream-title">Título *</Label>
+                  <Input
+                    id="stream-title"
+                    placeholder="Ex: Culto Dominical"
+                    value={newStream.title}
+                    onChange={(e) => setNewStream(prev => ({ ...prev, title: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stream-desc">Descrição</Label>
+                  <Textarea
+                    id="stream-desc"
+                    placeholder="Descreva a transmissão..."
+                    value={newStream.description}
+                    onChange={(e) => setNewStream(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="stream-time">Horário *</Label>
+                    <Input
+                      id="stream-time"
+                      type="datetime-local"
+                      value={newStream.scheduledTime}
+                      onChange={(e) => setNewStream(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="stream-platform">Plataforma *</Label>
+                    <select
+                      id="stream-platform"
+                      className="w-full p-2 border rounded-md"
+                      value={newStream.platform}
+                      onChange={(e) => setNewStream(prev => ({ ...prev, platform: e.target.value }))}
+                    >
+                      <option value="youtube">YouTube</option>
+                      <option value="facebook">Facebook</option>
+                      <option value="instagram">Instagram</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button onClick={handleCreateStream} className="flex-1">
+                    Agendar Stream
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsStreamDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {!isLive ? (
+            <Button onClick={handleStartStream} className="bg-green-600 hover:bg-green-700">
+              <Play className="h-4 w-4 mr-2" />
+              Iniciar Live
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Agendar Nova Transmissão</DialogTitle>
-              <DialogDescription>
-                Configure os detalhes da sua próxima transmissão ao vivo
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="stream-title">Título *</Label>
-                <Input
-                  id="stream-title"
-                  placeholder="Ex: Culto de Domingo"
-                  value={newStream.title}
-                  onChange={(e) => setNewStream(prev => ({ ...prev, title: e.target.value }))}
-                />
+          ) : (
+            <Button onClick={handleStopStream} variant="destructive">
+              <Square className="h-4 w-4 mr-2" />
+              Finalizar Live
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Live Status */}
+      {isLive && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <div>
+                  <h3 className="font-semibold text-red-800">AO VIVO</h3>
+                  <p className="text-sm text-red-600">Transmitindo agora no YouTube</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="stream-desc">Descrição</Label>
-                <Textarea
-                  id="stream-desc"
-                  placeholder="Descreva o conteúdo da transmissão..."
-                  value={newStream.description}
-                  onChange={(e) => setNewStream(prev => ({ ...prev, description: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="stream-time">Data e Hora *</Label>
-                <Input
-                  id="stream-time"
-                  type="datetime-local"
-                  value={newStream.scheduledTime}
-                  onChange={(e) => setNewStream(prev => ({ ...prev, scheduledTime: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="stream-youtube">ID do Vídeo YouTube (opcional)</Label>
-                <Input
-                  id="stream-youtube"
-                  placeholder="dQw4w9WgXcQ"
-                  value={newStream.youtubeId}
-                  onChange={(e) => setNewStream(prev => ({ ...prev, youtubeId: e.target.value }))}
-                />
-              </div>
-              <div className="flex space-x-2">
-                <Button onClick={handleCreateStream} className="flex-1">
-                  Agendar
-                </Button>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancelar
-                </Button>
+              <div className="grid grid-cols-3 gap-6 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-red-700">{streamingStats.currentViewers}</div>
+                  <p className="text-xs text-red-600">Visualizações</p>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-700">{streamingStats.streamDuration}</div>
+                  <p className="text-xs text-red-600">Duração</p>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-700">{streamingStats.chatMessages}</div>
+                  <p className="text-xs text-red-600">Mensagens</p>
+                </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="schedule">Agenda</TabsTrigger>
           <TabsTrigger value="live">Ao Vivo</TabsTrigger>
+          <TabsTrigger value="scheduled">Agendadas</TabsTrigger>
+          <TabsTrigger value="history">Histórico</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="settings">Configurações</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="schedule" className="space-y-6">
-          <div className="grid gap-4">
-            {streamSchedules.map((stream) => (
+        <TabsContent value="live" className="space-y-6">
+          {/* Live Stats */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Visualizações Atuais</CardTitle>
+                <Eye className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{streamingStats.currentViewers}</div>
+                <p className="text-xs text-muted-foreground">
+                  Pico: {streamingStats.peakViewers}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Duração</CardTitle>
+                <Clock className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{streamingStats.streamDuration}</div>
+                <p className="text-xs text-muted-foreground">Tempo no ar</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Chat</CardTitle>
+                <MessageCircle className="h-4 w-4 text-purple-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{streamingStats.chatMessages}</div>
+                <p className="text-xs text-muted-foreground">mensagens</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Engajamento</CardTitle>
+                <Share2 className="h-4 w-4 text-orange-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{streamingStats.likes + streamingStats.shares}</div>
+                <p className="text-xs text-muted-foreground">curtidas + compartilhamentos</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Live Controls */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Controles da Transmissão</CardTitle>
+              <CardDescription>Gerencie sua stream ao vivo</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                  <Settings className="h-6 w-6" />
+                  <span>Configurações</span>
+                </Button>
+                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                  <MessageCircle className="h-6 w-6" />
+                  <span>Moderar Chat</span>
+                </Button>
+                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                  <Share2 className="h-6 w-6" />
+                  <span>Compartilhar</span>
+                </Button>
+                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
+                  <BarChart3 className="h-6 w-6" />
+                  <span>Estatísticas</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Stream Quality */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Qualidade da Stream</CardTitle>
+              <CardDescription>Monitore a qualidade da transmissão</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span>Qualidade de Vídeo</span>
+                  <Badge variant="default">1080p</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Taxa de Bits</span>
+                  <span className="font-medium">4500 kbps</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>FPS</span>
+                  <span className="font-medium">30 fps</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Estabilidade</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-green-600">Estável</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="scheduled" className="space-y-6">
+          <div className="space-y-4">
+            {scheduledStreams.map((stream) => (
               <Card key={stream.id}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="font-semibold text-lg text-purple-800">{stream.title}</h3>
-                        <Badge 
-                          variant={stream.isLive ? "default" : "secondary"}
-                          className={stream.isLive ? "bg-red-600 animate-pulse" : ""}
-                        >
-                          {stream.isLive ? "AO VIVO" : "AGENDADO"}
+                        <h3 className="font-semibold text-lg">{stream.title}</h3>
+                        <Badge variant="secondary">
+                          {stream.platform === 'youtube' ? 'YouTube' : 
+                           stream.platform === 'facebook' ? 'Facebook' : 'Instagram'}
                         </Badge>
                       </div>
                       <p className="text-gray-600 mb-3">{stream.description}</p>
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <div className="flex items-center space-x-1">
                           <Calendar className="h-4 w-4" />
-                          <span>{formatDateTime(stream.scheduledTime)}</span>
+                          <span>{new Date(stream.scheduledTime).toLocaleString('pt-BR')}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Users className="h-4 w-4" />
-                          <span>{stream.currentViewers}/{stream.maxViewers} visualizadores</span>
+                          <span>~{stream.estimatedViewers} visualizações esperadas</span>
                         </div>
-                        {stream.youtubeId && (
-                          <div className="flex items-center space-x-1">
-                            <Video className="h-4 w-4" />
-                            <span>YouTube ID: {stream.youtubeId}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                      {stream.isLive ? (
-                        <>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-1" />
-                            Monitor
-                          </Button>
-                          <Button 
-                            variant="destructive" 
-                            size="sm"
-                            onClick={() => handleEndStream(stream.id)}
-                          >
-                            Finalizar
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button 
-                            size="sm"
-                            onClick={() => handleGoLive(stream.id)}
-                            className="bg-red-600 hover:bg-red-700"
-                          >
-                            <Play className="h-4 w-4 mr-1" />
-                            Iniciar
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
+                      <Button variant="outline" size="sm">
+                        Editar
+                      </Button>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                        <Play className="h-4 w-4 mr-1" />
+                        Iniciar
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -268,224 +419,133 @@ export default function StreamingManager() {
           </div>
         </TabsContent>
 
-        <TabsContent value="live" className="space-y-6">
-          {streamSchedules.filter(s => s.isLive).length > 0 ? (
-            <div className="space-y-6">
-              {streamSchedules.filter(s => s.isLive).map((stream) => (
-                <Card key={stream.id} className="border-red-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
-                      <span>Transmissão Ativa</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <h3 className="font-semibold text-lg mb-2">{stream.title}</h3>
-                        <p className="text-gray-600 mb-4">{stream.description}</p>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span>Visualizadores atuais:</span>
-                            <Badge>{stream.currentViewers}</Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span>Duração:</span>
-                            <span>1h 23min</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span>Qualidade:</span>
-                            <Badge variant="outline">1080p</Badge>
-                          </div>
+        <TabsContent value="history" className="space-y-6">
+          <div className="space-y-4">
+            {recentStreams.map((stream) => (
+              <Card key={stream.id}>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg mb-2">{stream.title}</h3>
+                      <div className="grid md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Data:</span>
+                          <div className="font-medium">{new Date(stream.date).toLocaleDateString('pt-BR')}</div>
                         </div>
-                      </div>
-                      <div className="bg-gray-100 rounded-lg p-4">
-                        <h4 className="font-semibold mb-2">Controles de Transmissão</h4>
-                        <div className="space-y-2">
-                          <Button variant="outline" className="w-full">
-                            <Settings className="h-4 w-4 mr-2" />
-                            Configurações de Vídeo
-                          </Button>
-                          <Button variant="outline" className="w-full">
-                            <Users className="h-4 w-4 mr-2" />
-                            Moderar Chat
-                          </Button>
-                          <Button variant="destructive" className="w-full">
-                            Finalizar Transmissão
-                          </Button>
+                        <div>
+                          <span className="text-gray-500">Visualizações:</span>
+                          <div className="font-medium">{stream.views}</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Duração:</span>
+                          <div className="font-medium">{stream.duration}</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Engajamento:</span>
+                          <div className="font-medium">{stream.engagement}%</div>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Video className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  Nenhuma transmissão ativa
-                </h3>
-                <p className="text-gray-500 mb-6">
-                  Inicie uma transmissão da agenda ou crie uma nova
-                </p>
-                <Button onClick={() => setIsCreateDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Transmissão
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm">
+                        Ver Detalhes
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        Repetir Stream
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Streams</CardTitle>
-                <Video className="h-4 w-4 text-purple-600" />
+              <CardHeader>
+                <CardTitle>Visualizações por Mês</CardTitle>
+                <CardDescription>Audiência das transmissões</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{streamingStats.totalStreams}</div>
-                <p className="text-xs text-muted-foreground">+12% desde o mês passado</p>
+                <div className="space-y-4">
+                  {['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'].map((month, index) => {
+                    const views = [1250, 1890, 1456, 2045, 1878, 2234][index];
+                    const percentage = (views / 2234) * 100;
+                    return (
+                      <div key={month} className="flex items-center justify-between">
+                        <span className="text-sm font-medium w-20">{month}</span>
+                        <div className="flex-1 mx-4">
+                          <div className="bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-red-600 h-2 rounded-full" 
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                        <span className="text-sm text-gray-600 w-20 text-right">{views}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Visualizadores</CardTitle>
-                <Users className="h-4 w-4 text-blue-600" />
+              <CardHeader>
+                <CardTitle>Horários de Maior Audiência</CardTitle>
+                <CardDescription>Quando sua audiência está online</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{streamingStats.totalViewers.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">+{streamingStats.growthRate}% crescimento</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Média de Visualizadores</CardTitle>
-                <Eye className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{streamingStats.avgViewers}</div>
-                <p className="text-xs text-muted-foreground">Por transmissão</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Tempo Total</CardTitle>
-                <Clock className="h-4 w-4 text-orange-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{streamingStats.totalWatchTime}</div>
-                <p className="text-xs text-muted-foreground">Tempo assistido</p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span>Domingo - 09:00</span>
+                    <span className="font-semibold">245 visualizações médias</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Quarta - 19:30</span>
+                    <span className="font-semibold">156 visualizações médias</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Sexta - 20:00</span>
+                    <span className="font-semibold">189 visualizações médias</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Domingo - 19:00</span>
+                    <span className="font-semibold">198 visualizações médias</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Estatísticas da Semana</CardTitle>
-              <CardDescription>Visualizadores por dia da semana</CardDescription>
+              <CardTitle>Estatísticas Gerais</CardTitle>
+              <CardDescription>Resumo das suas transmissões</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'].map((day, index) => {
-                  const viewers = [45, 32, 180, 67, 89, 156, 420][index];
-                  const percentage = (viewers / 420) * 100;
-                  return (
-                    <div key={day} className="flex items-center justify-between">
-                      <span className="text-sm font-medium w-20">{day}</span>
-                      <div className="flex-1 mx-4">
-                        <div className="bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-purple-600 h-2 rounded-full" 
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                      <span className="text-sm text-gray-600 w-16 text-right">{viewers} views</span>
-                    </div>
-                  );
-                })}
+              <div className="grid md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">12</div>
+                  <p className="text-sm text-gray-600">Streams este mês</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">2.1h</div>
+                  <p className="text-sm text-gray-600">Duração média</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">167</div>
+                  <p className="text-sm text-gray-600">Visualizações médias</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">78.5%</div>
+                  <p className="text-sm text-gray-600">Taxa de retenção</p>
+                </div>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações do YouTube</CardTitle>
-                <CardDescription>Configure a integração com o YouTube Live</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="yt-api-key">API Key do YouTube</Label>
-                  <Input
-                    id="yt-api-key"
-                    type="password"
-                    placeholder="••••••••••••••••••••"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="yt-channel-id">ID do Canal</Label>
-                  <Input
-                    id="yt-channel-id"
-                    placeholder="UCxxxxxxxxxxxxxxxxxx"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch id="auto-record" defaultChecked />
-                  <Label htmlFor="auto-record">Gravar automaticamente</Label>
-                </div>
-                <Button>Salvar Configurações</Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações de Transmissão</CardTitle>
-                <CardDescription>Ajustes gerais para as transmissões</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="default-quality">Qualidade Padrão</Label>
-                  <select 
-                    id="default-quality" 
-                    className="w-full p-2 border rounded-md"
-                    defaultValue="1080p"
-                  >
-                    <option value="720p">720p</option>
-                    <option value="1080p">1080p</option>
-                    <option value="4k">4K</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max-viewers">Limite de Visualizadores</Label>
-                  <Input
-                    id="max-viewers"
-                    type="number"
-                    defaultValue="500"
-                    placeholder="500"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch id="chat-enabled" defaultChecked />
-                  <Label htmlFor="chat-enabled">Chat habilitado</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch id="notifications" defaultChecked />
-                  <Label htmlFor="notifications">Notificações automáticas</Label>
-                </div>
-                <Button>Salvar Configurações</Button>
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
       </Tabs>
     </div>
