@@ -8,6 +8,7 @@ import BibleVerse from "@/components/sections/bible-verse";
 import Testimonials from "@/components/sections/testimonials";
 import Newsletter from "@/components/sections/newsletter";
 import SocialMedia from "@/components/sections/social-media";
+import LiveStreaming from "@/components/sections/live-streaming";
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       <Header />
       <main>
         <HeroCarousel />
+        <LiveStreaming />
         <AboutSection />
         <ServiceSchedule />
         <LatestMessages />

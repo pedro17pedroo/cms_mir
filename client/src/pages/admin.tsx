@@ -4,7 +4,10 @@ import ContentEditor from "@/components/admin/content-editor";
 import EventManager from "@/components/admin/event-manager";
 import TestimonialManager from "@/components/admin/testimonial-manager";
 import MessageManager from "@/components/admin/message-manager";
+import AnalyticsDashboard from "@/components/admin/analytics-dashboard";
+import ContentManager from "@/components/admin/content-manager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import MetaTags, { generatePageMeta } from "@/components/seo/meta-tags";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -70,12 +73,16 @@ export default function Admin() {
         );
       case "content":
         return <ContentEditor />;
+      case "content-manager":
+        return <ContentManager />;
       case "events":
         return <EventManager />;
       case "testimonials":
         return <TestimonialManager />;
       case "messages":
         return <MessageManager />;
+      case "analytics":
+        return <AnalyticsDashboard />;
       default:
         return <ContentEditor />;
     }
@@ -83,6 +90,7 @@ export default function Admin() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      <MetaTags {...generatePageMeta('admin')} />
       <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto">

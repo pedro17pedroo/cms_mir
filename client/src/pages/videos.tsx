@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import LiveStreaming from "@/components/live/live-streaming";
+import MetaTags, { generatePageMeta } from "@/components/seo/meta-tags";
 
 export default function Videos() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -67,46 +69,22 @@ export default function Videos() {
           </p>
         </div>
 
-        {/* Live Section */}
-        {liveVideos.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center justify-center mb-6">
-              <Radio className="h-6 w-6 text-red-500 animate-pulse mr-2" />
-              <h2 className="text-2xl font-bold text-red-500">AO VIVO AGORA</h2>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {liveVideos.map((video) => (
-                <Card key={video.id} className="border-red-500 hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="relative">
-                      <img
-                        src={video.thumbnailUrl || getYoutubeThumbnail(video.youtubeId)}
-                        alt={video.title}
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <Badge className="absolute top-2 right-2 bg-red-500 text-white animate-pulse">
-                        AO VIVO
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-xl text-[hsl(262,83%,58%)]">
-                      {video.title}
-                    </CardTitle>
-                    <CardDescription>{video.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      className="w-full bg-red-500 hover:bg-red-600 text-white"
-                      onClick={() => setSelectedVideo(video)}
-                    >
-                      <PlayCircle className="h-4 w-4 mr-2" />
-                      Assistir Agora
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        {/* Live Streaming Section */}
+        <div className="mb-16">
+          <div className="flex items-center justify-center mb-6">
+            <Radio className="h-6 w-6 text-red-500 animate-pulse mr-2" />
+            <h2 className="text-2xl font-bold text-red-500">TRANSMISSÃO AO VIVO</h2>
           </div>
-        )}
+          
+          <LiveStreaming
+            isLive={liveVideos.length > 0}
+            title={liveVideos[0]?.title || "Culto Dominical - Vivendo em Fé"}
+            description={liveVideos[0]?.description || "Junte-se a nós para um momento especial de adoração, oração e reflexão na Palavra de Deus."}
+            viewerCount={liveVideos[0]?.viewCount || 847}
+            scheduledTime="2025-06-29T10:00:00"
+            streamUrl="https://www.youtube.com/embed/live_stream?channel=UC_x5XG1OV2P6uZZ5FSM9Ttw"
+          />
+        </div>
 
         {/* Category Filter */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">

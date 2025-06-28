@@ -2,7 +2,7 @@ import {
   users, heroSlides, aboutContent, serviceSchedules, messages, 
   testimonials, bibleVerse, siteSettings, events, blogPosts, 
   donations, donationCampaigns, videos, newsletterSubscribers, 
-  eventRegistrations,
+  eventRegistrations, blogComments,
   type User, type InsertUser, type HeroSlide, type InsertHeroSlide,
   type AboutContent, type InsertAboutContent, type ServiceSchedule, type InsertServiceSchedule,
   type Message, type InsertMessage, type Testimonial, type InsertTestimonial,
@@ -10,7 +10,7 @@ import {
   type Event, type InsertEvent, type BlogPost, type InsertBlogPost,
   type Donation, type InsertDonation, type DonationCampaign, type InsertDonationCampaign,
   type Video, type InsertVideo, type NewsletterSubscriber, type InsertNewsletterSubscriber,
-  type EventRegistration, type InsertEventRegistration
+  type EventRegistration, type InsertEventRegistration, type BlogComment, type InsertBlogComment
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -102,6 +102,12 @@ export interface IStorage {
   // Event registrations methods
   getEventRegistrations(eventId: number): Promise<EventRegistration[]>;
   createEventRegistration(registration: InsertEventRegistration): Promise<EventRegistration>;
+
+  // Blog comments methods
+  getBlogComments(blogPostId: number): Promise<BlogComment[]>;
+  createBlogComment(comment: InsertBlogComment): Promise<BlogComment>;
+  approveBlogComment(id: number): Promise<BlogComment | undefined>;
+  deleteBlogComment(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -511,6 +517,36 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return newRegistration;
+  }
+
+  async getBlogComments(blogPostId: number): Promise<BlogComment[]> {
+    return await db.select().from(blogComments).where(eq(blogComments.blogPostId, blogPostId));
+  }
+
+  async createBlogComment(comment: InsertBlogComment): Promise<BlogComment> {
+    const [newComment] = await db
+      .insert(blogComments)
+      .values({
+        ...comment,
+        isApproved: false,
+        createdAt: new Date()
+      })
+      .returning();
+    return newComment;
+  }
+
+  async approveBlogComment(id: number): Promise<BlogComment | undefined> {
+    const [updated] = await db
+      .update(blogComments)
+      .set({ isApproved: true })
+      .where(eq(blogComments.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteBlogComment(id: number): Promise<boolean> {
+    const result = await db.delete(blogComments).where(eq(blogComments.id, id));
+    return (result.rowCount || 0) > 0;
   }
 }
 

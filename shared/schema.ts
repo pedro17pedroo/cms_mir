@@ -173,6 +173,17 @@ export const eventRegistrations = pgTable("event_registrations", {
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
+// Blog comments table
+export const blogComments = pgTable("blog_comments", {
+  id: serial("id").primaryKey(),
+  blogPostId: integer("blog_post_id").notNull(),
+  authorName: text("author_name").notNull(),
+  authorEmail: text("author_email").notNull(),
+  content: text("content").notNull(),
+  isApproved: boolean("is_approved").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -249,6 +260,12 @@ export const insertEventRegistrationSchema = createInsertSchema(eventRegistratio
   registeredAt: true,
 });
 
+export const insertBlogCommentSchema = createInsertSchema(blogComments).omit({
+  id: true,
+  createdAt: true,
+  isApproved: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -295,6 +312,9 @@ export type InsertNewsletterSubscriber = z.infer<typeof insertNewsletterSubscrib
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;
 
+export type BlogComment = typeof blogComments.$inferSelect;
+export type InsertBlogComment = z.infer<typeof insertBlogCommentSchema>;
+
 // Relations
 export const eventsRelations = relations(events, ({ many }) => ({
   registrations: many(eventRegistrations),
@@ -316,4 +336,15 @@ export const donationsRelations = relations(donations, ({ one }) => ({
 
 export const donationCampaignsRelations = relations(donationCampaigns, ({ many }) => ({
   donations: many(donations),
+}));
+
+export const blogPostsRelations = relations(blogPosts, ({ many }) => ({
+  comments: many(blogComments),
+}));
+
+export const blogCommentsRelations = relations(blogComments, ({ one }) => ({
+  blogPost: one(blogPosts, {
+    fields: [blogComments.blogPostId],
+    references: [blogPosts.id],
+  }),
 }));
