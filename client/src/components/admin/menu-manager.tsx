@@ -331,7 +331,7 @@ export default function MenuManager({}: MenuManagerProps) {
                 {/* Parent Menu Item */}
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
                   <div className="flex items-center gap-3">
-                    <DragHandle className="h-4 w-4 text-gray-400" />
+                    <GripVertical className="h-4 w-4 text-gray-400" />
                     <Menu className="h-4 w-4 text-gray-600" />
                     <div>
                       <div className="flex items-center gap-2">
