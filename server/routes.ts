@@ -8,7 +8,14 @@ import {
   insertMessageSchema,
   insertTestimonialSchema,
   insertBibleVerseSchema,
-  insertSiteSettingsSchema
+  insertSiteSettingsSchema,
+  insertEventSchema,
+  insertBlogPostSchema,
+  insertDonationSchema,
+  insertDonationCampaignSchema,
+  insertVideoSchema,
+  insertNewsletterSubscriberSchema,
+  insertEventRegistrationSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -235,6 +242,285 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(400).json({ error: "Invalid setting data" });
     }
+  });
+
+  // Events routes
+  app.get("/api/events", async (req, res) => {
+    const events = await storage.getEvents();
+    res.json(events);
+  });
+
+  app.get("/api/events/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const event = await storage.getEvent(id);
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+    res.json(event);
+  });
+
+  app.post("/api/events", async (req, res) => {
+    try {
+      const event = insertEventSchema.parse(req.body);
+      const newEvent = await storage.createEvent(event);
+      res.json(newEvent);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid event data" });
+    }
+  });
+
+  app.put("/api/events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const event = insertEventSchema.partial().parse(req.body);
+      const updatedEvent = await storage.updateEvent(id, event);
+      if (!updatedEvent) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+      res.json(updatedEvent);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid event data" });
+    }
+  });
+
+  app.delete("/api/events/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const deleted = await storage.deleteEvent(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+    res.json({ success: true });
+  });
+
+  // Event registrations routes
+  app.get("/api/events/:eventId/registrations", async (req, res) => {
+    const eventId = parseInt(req.params.eventId);
+    const registrations = await storage.getEventRegistrations(eventId);
+    res.json(registrations);
+  });
+
+  app.post("/api/events/:eventId/register", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const registration = insertEventRegistrationSchema.parse({ ...req.body, eventId });
+      const newRegistration = await storage.createEventRegistration(registration);
+      res.json(newRegistration);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid registration data" });
+    }
+  });
+
+  // Blog posts routes
+  app.get("/api/blog-posts", async (req, res) => {
+    const posts = await storage.getBlogPosts();
+    res.json(posts);
+  });
+
+  app.get("/api/blog-posts/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const post = await storage.getBlogPost(id);
+    if (!post) {
+      return res.status(404).json({ error: "Blog post not found" });
+    }
+    res.json(post);
+  });
+
+  app.get("/api/blog-posts/slug/:slug", async (req, res) => {
+    const post = await storage.getBlogPostBySlug(req.params.slug);
+    if (!post) {
+      return res.status(404).json({ error: "Blog post not found" });
+    }
+    res.json(post);
+  });
+
+  app.post("/api/blog-posts", async (req, res) => {
+    try {
+      const post = insertBlogPostSchema.parse(req.body);
+      const newPost = await storage.createBlogPost(post);
+      res.json(newPost);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid blog post data" });
+    }
+  });
+
+  app.put("/api/blog-posts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const post = insertBlogPostSchema.partial().parse(req.body);
+      const updatedPost = await storage.updateBlogPost(id, post);
+      if (!updatedPost) {
+        return res.status(404).json({ error: "Blog post not found" });
+      }
+      res.json(updatedPost);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid blog post data" });
+    }
+  });
+
+  app.delete("/api/blog-posts/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const deleted = await storage.deleteBlogPost(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Blog post not found" });
+    }
+    res.json({ success: true });
+  });
+
+  // Donations routes
+  app.get("/api/donations", async (req, res) => {
+    const donations = await storage.getDonations();
+    res.json(donations);
+  });
+
+  app.get("/api/donations/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const donation = await storage.getDonation(id);
+    if (!donation) {
+      return res.status(404).json({ error: "Donation not found" });
+    }
+    res.json(donation);
+  });
+
+  app.post("/api/donations", async (req, res) => {
+    try {
+      const donation = insertDonationSchema.parse(req.body);
+      const newDonation = await storage.createDonation(donation);
+      res.json(newDonation);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid donation data" });
+    }
+  });
+
+  app.patch("/api/donations/:id/status", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      if (!status || typeof status !== 'string') {
+        return res.status(400).json({ error: "Status is required" });
+      }
+      const updatedDonation = await storage.updateDonationStatus(id, status);
+      if (!updatedDonation) {
+        return res.status(404).json({ error: "Donation not found" });
+      }
+      res.json(updatedDonation);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid status data" });
+    }
+  });
+
+  // Donation campaigns routes
+  app.get("/api/donation-campaigns", async (req, res) => {
+    const campaigns = await storage.getDonationCampaigns();
+    res.json(campaigns);
+  });
+
+  app.get("/api/donation-campaigns/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const campaign = await storage.getDonationCampaign(id);
+    if (!campaign) {
+      return res.status(404).json({ error: "Campaign not found" });
+    }
+    res.json(campaign);
+  });
+
+  app.post("/api/donation-campaigns", async (req, res) => {
+    try {
+      const campaign = insertDonationCampaignSchema.parse(req.body);
+      const newCampaign = await storage.createDonationCampaign(campaign);
+      res.json(newCampaign);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid campaign data" });
+    }
+  });
+
+  app.put("/api/donation-campaigns/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const campaign = insertDonationCampaignSchema.partial().parse(req.body);
+      const updatedCampaign = await storage.updateDonationCampaign(id, campaign);
+      if (!updatedCampaign) {
+        return res.status(404).json({ error: "Campaign not found" });
+      }
+      res.json(updatedCampaign);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid campaign data" });
+    }
+  });
+
+  // Videos routes
+  app.get("/api/videos", async (req, res) => {
+    const videos = await storage.getVideos();
+    res.json(videos);
+  });
+
+  app.get("/api/videos/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const video = await storage.getVideo(id);
+    if (!video) {
+      return res.status(404).json({ error: "Video not found" });
+    }
+    res.json(video);
+  });
+
+  app.post("/api/videos", async (req, res) => {
+    try {
+      const video = insertVideoSchema.parse(req.body);
+      const newVideo = await storage.createVideo(video);
+      res.json(newVideo);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid video data" });
+    }
+  });
+
+  app.put("/api/videos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const video = insertVideoSchema.partial().parse(req.body);
+      const updatedVideo = await storage.updateVideo(id, video);
+      if (!updatedVideo) {
+        return res.status(404).json({ error: "Video not found" });
+      }
+      res.json(updatedVideo);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid video data" });
+    }
+  });
+
+  app.delete("/api/videos/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const deleted = await storage.deleteVideo(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Video not found" });
+    }
+    res.json({ success: true });
+  });
+
+  // Newsletter routes
+  app.get("/api/newsletter-subscribers", async (req, res) => {
+    const subscribers = await storage.getNewsletterSubscribers();
+    res.json(subscribers);
+  });
+
+  app.post("/api/newsletter-subscribe", async (req, res) => {
+    try {
+      const subscriber = insertNewsletterSubscriberSchema.parse(req.body);
+      const newSubscriber = await storage.createNewsletterSubscriber(subscriber);
+      res.json(newSubscriber);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid subscriber data" });
+    }
+  });
+
+  app.post("/api/newsletter-unsubscribe", async (req, res) => {
+    const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    const unsubscribed = await storage.unsubscribe(email);
+    if (!unsubscribed) {
+      return res.status(404).json({ error: "Subscriber not found" });
+    }
+    res.json({ success: true });
   });
 
   const httpServer = createServer(app);

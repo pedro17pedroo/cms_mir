@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -67,6 +67,111 @@ export const siteSettings = pgTable("site_settings", {
   value: text("value").notNull(),
 });
 
+// Events table
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  date: text("date").notNull(),
+  time: text("time").notNull(),
+  location: text("location").notNull(),
+  imageUrl: text("image_url").notNull(),
+  category: text("category").notNull(), // e.g., "conference", "worship", "youth"
+  registrationLink: text("registration_link"),
+  maxAttendees: integer("max_attendees"),
+  currentAttendees: integer("current_attendees").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Blog posts table
+export const blogPosts = pgTable("blog_posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull(),
+  excerpt: text("excerpt").notNull(),
+  author: text("author").notNull(),
+  category: text("category").notNull(),
+  tags: text("tags").array(),
+  imageUrl: text("image_url").notNull(),
+  isPublished: boolean("is_published").default(false),
+  publishedAt: timestamp("published_at"),
+  viewCount: integer("view_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Donations table
+export const donations = pgTable("donations", {
+  id: serial("id").primaryKey(),
+  donorName: text("donor_name").notNull(),
+  donorEmail: text("donor_email").notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").default("USD"),
+  type: text("type").notNull(), // "one-time" or "recurring"
+  frequency: text("frequency"), // "monthly", "weekly", etc.
+  campaignId: integer("campaign_id"),
+  status: text("status").notNull(), // "pending", "completed", "failed"
+  transactionId: text("transaction_id"),
+  paymentMethod: text("payment_method"), // "stripe", "paypal"
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Donation campaigns table
+export const donationCampaigns = pgTable("donation_campaigns", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  goal: numeric("goal", { precision: 10, scale: 2 }).notNull(),
+  raised: numeric("raised", { precision: 10, scale: 2 }).default("0"),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date").notNull(),
+  imageUrl: text("image_url"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Videos table
+export const videos = pgTable("videos", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  youtubeId: text("youtube_id").notNull(),
+  category: text("category").notNull(), // "sermon", "teaching", "testimony"
+  speaker: text("speaker"),
+  date: text("date").notNull(),
+  duration: text("duration"),
+  thumbnailUrl: text("thumbnail_url"),
+  viewCount: integer("view_count").default(0),
+  isLive: boolean("is_live").default(false),
+  scheduledAt: timestamp("scheduled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Newsletter subscribers table
+export const newsletterSubscribers = pgTable("newsletter_subscribers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  isActive: boolean("is_active").default(true),
+  subscribedAt: timestamp("subscribed_at").defaultNow(),
+});
+
+// Event registrations table
+export const eventRegistrations = pgTable("event_registrations", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  numberOfAttendees: integer("number_of_attendees").default(1),
+  specialRequests: text("special_requests"),
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -101,6 +206,48 @@ export const insertSiteSettingsSchema = createInsertSchema(siteSettings).omit({
   id: true,
 });
 
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  currentAttendees: true,
+});
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  viewCount: true,
+});
+
+export const insertDonationSchema = createInsertSchema(donations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDonationCampaignSchema = createInsertSchema(donationCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  raised: true,
+});
+
+export const insertVideoSchema = createInsertSchema(videos).omit({
+  id: true,
+  createdAt: true,
+  viewCount: true,
+});
+
+export const insertNewsletterSubscriberSchema = createInsertSchema(newsletterSubscribers).omit({
+  id: true,
+  subscribedAt: true,
+});
+
+export const insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({
+  id: true,
+  registeredAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -125,3 +272,24 @@ export type InsertBibleVerse = z.infer<typeof insertBibleVerseSchema>;
 
 export type SiteSettings = typeof siteSettings.$inferSelect;
 export type InsertSiteSettings = z.infer<typeof insertSiteSettingsSchema>;
+
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+
+export type Donation = typeof donations.$inferSelect;
+export type InsertDonation = z.infer<typeof insertDonationSchema>;
+
+export type DonationCampaign = typeof donationCampaigns.$inferSelect;
+export type InsertDonationCampaign = z.infer<typeof insertDonationCampaignSchema>;
+
+export type Video = typeof videos.$inferSelect;
+export type InsertVideo = z.infer<typeof insertVideoSchema>;
+
+export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
+export type InsertNewsletterSubscriber = z.infer<typeof insertNewsletterSubscriberSchema>;
+
+export type EventRegistration = typeof eventRegistrations.$inferSelect;
+export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;

@@ -6,7 +6,14 @@ import {
   messages, type Message, type InsertMessage,
   testimonials, type Testimonial, type InsertTestimonial,
   bibleVerse, type BibleVerse, type InsertBibleVerse,
-  siteSettings, type SiteSettings, type InsertSiteSettings
+  siteSettings, type SiteSettings, type InsertSiteSettings,
+  events, type Event, type InsertEvent,
+  blogPosts, type BlogPost, type InsertBlogPost,
+  donations, type Donation, type InsertDonation,
+  donationCampaigns, type DonationCampaign, type InsertDonationCampaign,
+  videos, type Video, type InsertVideo,
+  newsletterSubscribers, type NewsletterSubscriber, type InsertNewsletterSubscriber,
+  eventRegistrations, type EventRegistration, type InsertEventRegistration
 } from "@shared/schema";
 
 export interface IStorage {
@@ -52,6 +59,50 @@ export interface IStorage {
   getSiteSettings(): Promise<SiteSettings[]>;
   getSiteSetting(key: string): Promise<SiteSettings | undefined>;
   updateSiteSetting(key: string, value: string): Promise<SiteSettings>;
+
+  // Events methods
+  getEvents(): Promise<Event[]>;
+  getEvent(id: number): Promise<Event | undefined>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  updateEvent(id: number, event: Partial<InsertEvent>): Promise<Event | undefined>;
+  deleteEvent(id: number): Promise<boolean>;
+
+  // Blog posts methods
+  getBlogPosts(): Promise<BlogPost[]>;
+  getBlogPost(id: number): Promise<BlogPost | undefined>;
+  getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
+  createBlogPost(post: InsertBlogPost): Promise<BlogPost>;
+  updateBlogPost(id: number, post: Partial<InsertBlogPost>): Promise<BlogPost | undefined>;
+  deleteBlogPost(id: number): Promise<boolean>;
+
+  // Donations methods
+  getDonations(): Promise<Donation[]>;
+  getDonation(id: number): Promise<Donation | undefined>;
+  createDonation(donation: InsertDonation): Promise<Donation>;
+  updateDonationStatus(id: number, status: string): Promise<Donation | undefined>;
+
+  // Donation campaigns methods
+  getDonationCampaigns(): Promise<DonationCampaign[]>;
+  getDonationCampaign(id: number): Promise<DonationCampaign | undefined>;
+  createDonationCampaign(campaign: InsertDonationCampaign): Promise<DonationCampaign>;
+  updateDonationCampaign(id: number, campaign: Partial<InsertDonationCampaign>): Promise<DonationCampaign | undefined>;
+  updateCampaignRaised(id: number, amount: number): Promise<DonationCampaign | undefined>;
+
+  // Videos methods
+  getVideos(): Promise<Video[]>;
+  getVideo(id: number): Promise<Video | undefined>;
+  createVideo(video: InsertVideo): Promise<Video>;
+  updateVideo(id: number, video: Partial<InsertVideo>): Promise<Video | undefined>;
+  deleteVideo(id: number): Promise<boolean>;
+
+  // Newsletter methods
+  getNewsletterSubscribers(): Promise<NewsletterSubscriber[]>;
+  createNewsletterSubscriber(subscriber: InsertNewsletterSubscriber): Promise<NewsletterSubscriber>;
+  unsubscribe(email: string): Promise<boolean>;
+
+  // Event registrations methods
+  getEventRegistrations(eventId: number): Promise<EventRegistration[]>;
+  createEventRegistration(registration: InsertEventRegistration): Promise<EventRegistration>;
 }
 
 export class MemStorage implements IStorage {
@@ -63,6 +114,13 @@ export class MemStorage implements IStorage {
   private testimonials: Map<number, Testimonial>;
   private bibleVerse: BibleVerse | undefined;
   private siteSettings: Map<string, SiteSettings>;
+  private events: Map<number, Event>;
+  private blogPosts: Map<number, BlogPost>;
+  private donations: Map<number, Donation>;
+  private donationCampaigns: Map<number, DonationCampaign>;
+  private videos: Map<number, Video>;
+  private newsletterSubscribers: Map<string, NewsletterSubscriber>;
+  private eventRegistrations: Map<number, EventRegistration>;
   private currentId: number;
 
   constructor() {
@@ -73,6 +131,13 @@ export class MemStorage implements IStorage {
     this.messages = new Map();
     this.testimonials = new Map();
     this.siteSettings = new Map();
+    this.events = new Map();
+    this.blogPosts = new Map();
+    this.donations = new Map();
+    this.donationCampaigns = new Map();
+    this.videos = new Map();
+    this.newsletterSubscribers = new Map();
+    this.eventRegistrations = new Map();
     this.currentId = 1;
     this.initializeDefaultData();
   }
@@ -327,6 +392,284 @@ export class MemStorage implements IStorage {
     const setting: SiteSettings = existing ? { ...existing, value } : { id: this.currentId++, key, value };
     this.siteSettings.set(key, setting);
     return setting;
+  }
+
+  // Events methods
+  async getEvents(): Promise<Event[]> {
+    return Array.from(this.events.values()).sort((a, b) => {
+      const dateA = new Date(a.date + ' ' + a.time);
+      const dateB = new Date(b.date + ' ' + b.time);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }
+
+  async getEvent(id: number): Promise<Event | undefined> {
+    return this.events.get(id);
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const id = this.currentId++;
+    const newEvent: Event = { 
+      ...event, 
+      id,
+      currentAttendees: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.events.set(id, newEvent);
+    return newEvent;
+  }
+
+  async updateEvent(id: number, event: Partial<InsertEvent>): Promise<Event | undefined> {
+    const existing = this.events.get(id);
+    if (!existing) return undefined;
+    const updated = { 
+      ...existing, 
+      ...event,
+      updatedAt: new Date()
+    };
+    this.events.set(id, updated);
+    return updated;
+  }
+
+  async deleteEvent(id: number): Promise<boolean> {
+    return this.events.delete(id);
+  }
+
+  // Blog posts methods
+  async getBlogPosts(): Promise<BlogPost[]> {
+    return Array.from(this.blogPosts.values())
+      .filter(post => post.isPublished)
+      .sort((a, b) => {
+        const dateA = a.publishedAt || a.createdAt;
+        const dateB = b.publishedAt || b.createdAt;
+        return dateB!.getTime() - dateA!.getTime();
+      });
+  }
+
+  async getBlogPost(id: number): Promise<BlogPost | undefined> {
+    return this.blogPosts.get(id);
+  }
+
+  async getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+    return Array.from(this.blogPosts.values()).find(post => post.slug === slug);
+  }
+
+  async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    const id = this.currentId++;
+    const newPost: BlogPost = { 
+      ...post,
+      id,
+      viewCount: 0,
+      tags: post.tags || [],
+      publishedAt: post.isPublished ? new Date() : null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.blogPosts.set(id, newPost);
+    return newPost;
+  }
+
+  async updateBlogPost(id: number, post: Partial<InsertBlogPost>): Promise<BlogPost | undefined> {
+    const existing = this.blogPosts.get(id);
+    if (!existing) return undefined;
+    const updated = { 
+      ...existing, 
+      ...post,
+      publishedAt: post.isPublished && !existing.publishedAt ? new Date() : existing.publishedAt,
+      updatedAt: new Date()
+    };
+    this.blogPosts.set(id, updated);
+    return updated;
+  }
+
+  async deleteBlogPost(id: number): Promise<boolean> {
+    return this.blogPosts.delete(id);
+  }
+
+  // Donations methods
+  async getDonations(): Promise<Donation[]> {
+    return Array.from(this.donations.values()).sort((a, b) => 
+      b.createdAt!.getTime() - a.createdAt!.getTime()
+    );
+  }
+
+  async getDonation(id: number): Promise<Donation | undefined> {
+    return this.donations.get(id);
+  }
+
+  async createDonation(donation: InsertDonation): Promise<Donation> {
+    const id = this.currentId++;
+    const newDonation: Donation = { 
+      ...donation,
+      id,
+      createdAt: new Date()
+    };
+    this.donations.set(id, newDonation);
+
+    // Update campaign raised amount if applicable
+    if (donation.campaignId) {
+      const campaign = this.donationCampaigns.get(donation.campaignId);
+      if (campaign && donation.status === 'completed') {
+        const currentRaised = parseFloat(campaign.raised || '0');
+        const donationAmount = parseFloat(donation.amount);
+        campaign.raised = (currentRaised + donationAmount).toFixed(2);
+        this.donationCampaigns.set(donation.campaignId, campaign);
+      }
+    }
+
+    return newDonation;
+  }
+
+  async updateDonationStatus(id: number, status: string): Promise<Donation | undefined> {
+    const donation = this.donations.get(id);
+    if (!donation) return undefined;
+    donation.status = status;
+    this.donations.set(id, donation);
+    return donation;
+  }
+
+  // Donation campaigns methods
+  async getDonationCampaigns(): Promise<DonationCampaign[]> {
+    return Array.from(this.donationCampaigns.values())
+      .filter(campaign => campaign.isActive)
+      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime());
+  }
+
+  async getDonationCampaign(id: number): Promise<DonationCampaign | undefined> {
+    return this.donationCampaigns.get(id);
+  }
+
+  async createDonationCampaign(campaign: InsertDonationCampaign): Promise<DonationCampaign> {
+    const id = this.currentId++;
+    const newCampaign: DonationCampaign = { 
+      ...campaign,
+      id,
+      raised: '0',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.donationCampaigns.set(id, newCampaign);
+    return newCampaign;
+  }
+
+  async updateDonationCampaign(id: number, campaign: Partial<InsertDonationCampaign>): Promise<DonationCampaign | undefined> {
+    const existing = this.donationCampaigns.get(id);
+    if (!existing) return undefined;
+    const updated = { 
+      ...existing, 
+      ...campaign,
+      updatedAt: new Date()
+    };
+    this.donationCampaigns.set(id, updated);
+    return updated;
+  }
+
+  async updateCampaignRaised(id: number, amount: number): Promise<DonationCampaign | undefined> {
+    const campaign = this.donationCampaigns.get(id);
+    if (!campaign) return undefined;
+    const currentRaised = parseFloat(campaign.raised || '0');
+    campaign.raised = (currentRaised + amount).toFixed(2);
+    campaign.updatedAt = new Date();
+    this.donationCampaigns.set(id, campaign);
+    return campaign;
+  }
+
+  // Videos methods
+  async getVideos(): Promise<Video[]> {
+    return Array.from(this.videos.values()).sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
+  }
+
+  async getVideo(id: number): Promise<Video | undefined> {
+    return this.videos.get(id);
+  }
+
+  async createVideo(video: InsertVideo): Promise<Video> {
+    const id = this.currentId++;
+    const newVideo: Video = { 
+      ...video,
+      id,
+      viewCount: 0,
+      createdAt: new Date()
+    };
+    this.videos.set(id, newVideo);
+    return newVideo;
+  }
+
+  async updateVideo(id: number, video: Partial<InsertVideo>): Promise<Video | undefined> {
+    const existing = this.videos.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...video };
+    this.videos.set(id, updated);
+    return updated;
+  }
+
+  async deleteVideo(id: number): Promise<boolean> {
+    return this.videos.delete(id);
+  }
+
+  // Newsletter methods
+  async getNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
+    return Array.from(this.newsletterSubscribers.values())
+      .filter(sub => sub.isActive)
+      .sort((a, b) => b.subscribedAt!.getTime() - a.subscribedAt!.getTime());
+  }
+
+  async createNewsletterSubscriber(subscriber: InsertNewsletterSubscriber): Promise<NewsletterSubscriber> {
+    const existing = this.newsletterSubscribers.get(subscriber.email);
+    if (existing) {
+      existing.isActive = true;
+      existing.name = subscriber.name || existing.name;
+      return existing;
+    }
+    
+    const id = this.currentId++;
+    const newSubscriber: NewsletterSubscriber = { 
+      ...subscriber,
+      id,
+      isActive: true,
+      subscribedAt: new Date()
+    };
+    this.newsletterSubscribers.set(subscriber.email, newSubscriber);
+    return newSubscriber;
+  }
+
+  async unsubscribe(email: string): Promise<boolean> {
+    const subscriber = this.newsletterSubscribers.get(email);
+    if (!subscriber) return false;
+    subscriber.isActive = false;
+    this.newsletterSubscribers.set(email, subscriber);
+    return true;
+  }
+
+  // Event registrations methods
+  async getEventRegistrations(eventId: number): Promise<EventRegistration[]> {
+    return Array.from(this.eventRegistrations.values())
+      .filter(reg => reg.eventId === eventId)
+      .sort((a, b) => b.registeredAt!.getTime() - a.registeredAt!.getTime());
+  }
+
+  async createEventRegistration(registration: InsertEventRegistration): Promise<EventRegistration> {
+    const id = this.currentId++;
+    const newRegistration: EventRegistration = { 
+      ...registration,
+      id,
+      registeredAt: new Date()
+    };
+    this.eventRegistrations.set(id, newRegistration);
+
+    // Update event attendees count
+    const event = this.events.get(registration.eventId);
+    if (event) {
+      event.currentAttendees = (event.currentAttendees || 0) + (registration.numberOfAttendees || 1);
+      this.events.set(registration.eventId, event);
+    }
+
+    return newRegistration;
   }
 }
 

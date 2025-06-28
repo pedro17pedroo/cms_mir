@@ -28,12 +28,12 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            <a
-              href="#inicio"
+            <Link
+              href="/"
               className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
             >
               Início
-            </a>
+            </Link>
             
             <DropdownMenu>
               <DropdownMenuTrigger className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium flex items-center">
@@ -41,37 +41,43 @@ export default function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem>
-                  <a href="#visao">Nossa Visão</a>
+                  <a href="/#visao">Nossa Visão</a>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <a href="#missao">Nossa Missão</a>
+                  <a href="/#missao">Nossa Missão</a>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <a href="#cremos">O que Cremos</a>
+                  <a href="/#cremos">O que Cremos</a>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <a
-              href="#servicos"
+            <Link
+              href="/events"
               className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
             >
-              Serviços
-            </a>
-            <a
-              href="#ensinos"
+              Eventos
+            </Link>
+            <Link
+              href="/blog"
               className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
             >
-              Ensinos
-            </a>
-            <a
-              href="#eventos"
+              Blog
+            </Link>
+            <Link
+              href="/videos"
               className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
             >
-              Eventos e Blogs
-            </a>
+              Vídeos
+            </Link>
+            <Link
+              href="/donations"
+              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
+            >
+              Doações
+            </Link>
             <a
-              href="#contato"
+              href="/#contato"
               className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
             >
               Contato
