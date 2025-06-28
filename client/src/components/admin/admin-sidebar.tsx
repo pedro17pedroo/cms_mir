@@ -1,0 +1,76 @@
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { 
+  Home, 
+  FileText, 
+  Calendar, 
+  MessageSquare, 
+  Heart,
+  Settings,
+  LogOut
+} from "lucide-react";
+
+interface AdminSidebarProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
+export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "content", label: "Content", icon: FileText },
+    { id: "events", label: "Events", icon: Calendar },
+    { id: "messages", label: "Messages", icon: MessageSquare },
+    { id: "testimonials", label: "Testimonials", icon: Heart },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  return (
+    <div className="w-64 bg-white shadow-lg h-full">
+      <div className="p-6 border-b">
+        <div className="flex items-center space-x-2">
+          <div className="bg-[hsl(43,96%,56%)] text-white px-3 py-2 rounded font-bold text-lg">
+            MIR
+          </div>
+          <div>
+            <div className="font-medium text-gray-900">Church CMS</div>
+            <div className="text-sm text-gray-500">Admin Panel</div>
+          </div>
+        </div>
+      </div>
+
+      <nav className="p-4">
+        <ul className="space-y-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.id}>
+                <Button
+                  variant={activeTab === item.id ? "default" : "ghost"}
+                  className={`w-full justify-start ${
+                    activeTab === item.id 
+                      ? "bg-[hsl(43,96%,56%)] text-white" 
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setActiveTab(item.id)}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {item.label}
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <div className="absolute bottom-4 left-4 right-4">
+        <Link href="/">
+          <Button variant="outline" className="w-full justify-start">
+            <LogOut className="h-4 w-4 mr-2" />
+            Back to Site
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
