@@ -15,7 +15,13 @@ import {
   insertDonationCampaignSchema,
   insertVideoSchema,
   insertNewsletterSubscriberSchema,
-  insertEventRegistrationSchema
+  insertEventRegistrationSchema,
+  insertPageSchema,
+  insertMenuItemSchema,
+  insertLandingPageSectionSchema,
+  insertContentBlockSchema,
+  insertHeaderConfigSchema,
+  insertFooterConfigSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -614,6 +620,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Analytics error:", error);
       res.status(500).json({ error: "Erro ao carregar analytics" });
+    }
+  });
+
+  // Pages routes
+  app.get("/api/pages", async (req, res) => {
+    const pages = await storage.getPages();
+    res.json(pages);
+  });
+
+  app.post("/api/pages", async (req, res) => {
+    try {
+      const page = insertPageSchema.parse(req.body);
+      const newPage = await storage.createPage(page);
+      res.json(newPage);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid page data" });
+    }
+  });
+
+  app.put("/api/pages/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const page = insertPageSchema.partial().parse(req.body);
+      const updatedPage = await storage.updatePage(id, page);
+      if (!updatedPage) {
+        return res.status(404).json({ error: "Page not found" });
+      }
+      res.json(updatedPage);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid page data" });
+    }
+  });
+
+  app.delete("/api/pages/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const deleted = await storage.deletePage(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Page not found" });
+    }
+    res.json({ success: true });
+  });
+
+  // Menu items routes
+  app.get("/api/menu-items", async (req, res) => {
+    const menuItems = await storage.getMenuItems();
+    res.json(menuItems);
+  });
+
+  app.post("/api/menu-items", async (req, res) => {
+    try {
+      const menuItem = insertMenuItemSchema.parse(req.body);
+      const newMenuItem = await storage.createMenuItem(menuItem);
+      res.json(newMenuItem);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid menu item data" });
+    }
+  });
+
+  app.put("/api/menu-items/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const menuItem = insertMenuItemSchema.partial().parse(req.body);
+      const updatedMenuItem = await storage.updateMenuItem(id, menuItem);
+      if (!updatedMenuItem) {
+        return res.status(404).json({ error: "Menu item not found" });
+      }
+      res.json(updatedMenuItem);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid menu item data" });
+    }
+  });
+
+  app.delete("/api/menu-items/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const deleted = await storage.deleteMenuItem(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Menu item not found" });
+    }
+    res.json({ success: true });
+  });
+
+  // Landing page sections routes
+  app.get("/api/landing-page-sections", async (req, res) => {
+    const sections = await storage.getLandingPageSections();
+    res.json(sections);
+  });
+
+  app.post("/api/landing-page-sections", async (req, res) => {
+    try {
+      const section = insertLandingPageSectionSchema.parse(req.body);
+      const newSection = await storage.createLandingPageSection(section);
+      res.json(newSection);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid section data" });
+    }
+  });
+
+  app.put("/api/landing-page-sections/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const section = insertLandingPageSectionSchema.partial().parse(req.body);
+      const updatedSection = await storage.updateLandingPageSection(id, section);
+      if (!updatedSection) {
+        return res.status(404).json({ error: "Section not found" });
+      }
+      res.json(updatedSection);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid section data" });
+    }
+  });
+
+  app.delete("/api/landing-page-sections/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const deleted = await storage.deleteLandingPageSection(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Section not found" });
+    }
+    res.json({ success: true });
+  });
+
+  // Content blocks routes
+  app.get("/api/content-blocks", async (req, res) => {
+    const blocks = await storage.getContentBlocks();
+    res.json(blocks);
+  });
+
+  app.post("/api/content-blocks", async (req, res) => {
+    try {
+      const block = insertContentBlockSchema.parse(req.body);
+      const newBlock = await storage.createContentBlock(block);
+      res.json(newBlock);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid content block data" });
+    }
+  });
+
+  app.put("/api/content-blocks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const block = insertContentBlockSchema.partial().parse(req.body);
+      const updatedBlock = await storage.updateContentBlock(id, block);
+      if (!updatedBlock) {
+        return res.status(404).json({ error: "Content block not found" });
+      }
+      res.json(updatedBlock);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid content block data" });
+    }
+  });
+
+  app.delete("/api/content-blocks/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const deleted = await storage.deleteContentBlock(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Content block not found" });
+    }
+    res.json({ success: true });
+  });
+
+  // Header config routes
+  app.get("/api/header-config", async (req, res) => {
+    const config = await storage.getHeaderConfig();
+    res.json(config || {});
+  });
+
+  app.post("/api/header-config", async (req, res) => {
+    try {
+      const config = insertHeaderConfigSchema.parse(req.body);
+      const newConfig = await storage.updateHeaderConfig(config);
+      res.json(newConfig);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid header config data" });
+    }
+  });
+
+  // Footer config routes
+  app.get("/api/footer-config", async (req, res) => {
+    const config = await storage.getFooterConfig();
+    res.json(config || {});
+  });
+
+  app.post("/api/footer-config", async (req, res) => {
+    try {
+      const config = insertFooterConfigSchema.parse(req.body);
+      const newConfig = await storage.updateFooterConfig(config);
+      res.json(newConfig);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid footer config data" });
     }
   });
 

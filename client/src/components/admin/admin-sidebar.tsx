@@ -13,7 +13,12 @@ import {
   Video,
   Mail,
   DollarSign,
-  Users
+  Users,
+  Layout,
+  Menu,
+  Palette,
+  Blocks,
+  Globe
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -26,6 +31,11 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "content", label: "Conteúdo", icon: FileText },
     { id: "content-manager", label: "Gestor Conteúdo", icon: Users },
+    { id: "pages", label: "Gestão de Páginas", icon: Globe },
+    { id: "menus", label: "Gestão de Menus", icon: Menu },
+    { id: "landing-page", label: "Landing Page", icon: Layout },
+    { id: "blocks", label: "Biblioteca de Blocos", icon: Blocks },
+    { id: "header", label: "Header Personalizado", icon: Palette },
     { id: "events", label: "Eventos", icon: Calendar },
     { id: "messages", label: "Mensagens", icon: MessageSquare },
     { id: "testimonials", label: "Testemunhos", icon: Heart },

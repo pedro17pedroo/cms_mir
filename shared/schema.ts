@@ -184,6 +184,84 @@ export const blogComments = pgTable("blog_comments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Pages table for dynamic page management
+export const pages = pgTable("pages", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull(), // JSON structure for page blocks
+  isPublished: boolean("is_published").default(false),
+  isDefault: boolean("is_default").default(false), // for default pages like Home, About
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Menu items table for dynamic menu management
+export const menuItems = pgTable("menu_items", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  parentId: integer("parent_id"), // for dropdown submenus
+  order: integer("order").default(0),
+  isActive: boolean("is_active").default(true),
+  icon: text("icon"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Landing page sections for drag-and-drop management
+export const landingPageSections = pgTable("landing_page_sections", {
+  id: serial("id").primaryKey(),
+  sectionType: text("section_type").notNull(), // hero, announcements, events, sermons, etc.
+  title: text("title").notNull(),
+  content: text("content").notNull(), // JSON data for section configuration
+  order: integer("order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Reusable blocks library
+export const contentBlocks = pgTable("content_blocks", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  blockType: text("block_type").notNull(), // header, footer, testimony, gallery, etc.
+  content: text("content").notNull(), // JSON structure
+  thumbnail: text("thumbnail"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Header configuration
+export const headerConfig = pgTable("header_config", {
+  id: serial("id").primaryKey(),
+  logoUrl: text("logo_url"),
+  logoPosition: text("logo_position").default("left"),
+  logoSize: text("logo_size").default("medium"),
+  backgroundColor: text("background_color").default("#ffffff"),
+  textColor: text("text_color").default("#000000"),
+  menuStyle: text("menu_style").default("horizontal"),
+  socialLinks: text("social_links"), // JSON array
+  contactInfo: text("contact_info"), // JSON object
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Footer configuration
+export const footerConfig = pgTable("footer_config", {
+  id: serial("id").primaryKey(),
+  backgroundColor: text("background_color").default("#1a1a1a"),
+  textColor: text("text_color").default("#ffffff"),
+  columns: text("columns").notNull(), // JSON structure for footer columns
+  socialLinks: text("social_links"), // JSON array
+  contactInfo: text("contact_info"), // JSON object
+  copyrightText: text("copyright_text"),
+  newsletterEnabled: boolean("newsletter_enabled").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -266,6 +344,39 @@ export const insertBlogCommentSchema = createInsertSchema(blogComments).omit({
   isApproved: true,
 });
 
+export const insertPageSchema = createInsertSchema(pages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMenuItemSchema = createInsertSchema(menuItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertLandingPageSectionSchema = createInsertSchema(landingPageSections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContentBlockSchema = createInsertSchema(contentBlocks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertHeaderConfigSchema = createInsertSchema(headerConfig).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertFooterConfigSchema = createInsertSchema(footerConfig).omit({
+  id: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -314,6 +425,24 @@ export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSche
 
 export type BlogComment = typeof blogComments.$inferSelect;
 export type InsertBlogComment = z.infer<typeof insertBlogCommentSchema>;
+
+export type Page = typeof pages.$inferSelect;
+export type InsertPage = z.infer<typeof insertPageSchema>;
+
+export type MenuItem = typeof menuItems.$inferSelect;
+export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
+
+export type LandingPageSection = typeof landingPageSections.$inferSelect;
+export type InsertLandingPageSection = z.infer<typeof insertLandingPageSectionSchema>;
+
+export type ContentBlock = typeof contentBlocks.$inferSelect;
+export type InsertContentBlock = z.infer<typeof insertContentBlockSchema>;
+
+export type HeaderConfig = typeof headerConfig.$inferSelect;
+export type InsertHeaderConfig = z.infer<typeof insertHeaderConfigSchema>;
+
+export type FooterConfig = typeof footerConfig.$inferSelect;
+export type InsertFooterConfig = z.infer<typeof insertFooterConfigSchema>;
 
 // Relations
 export const eventsRelations = relations(events, ({ many }) => ({

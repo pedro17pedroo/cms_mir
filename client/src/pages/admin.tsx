@@ -10,6 +10,11 @@ import SocialMediaManager from "@/components/admin/social-media-manager";
 import StreamingManager from "@/components/admin/streaming-manager";
 import NewsletterManager from "@/components/admin/newsletter-manager";
 import DonationManager from "@/components/admin/donation-manager";
+import PageManager from "@/components/admin/page-manager";
+import MenuManager from "@/components/admin/menu-manager";
+import LandingPageManager from "@/components/admin/landing-page-manager";
+import BlocksLibrary from "@/components/admin/blocks-library";
+import HeaderCustomizer from "@/components/admin/header-customizer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import MetaTags, { generatePageMeta } from "@/components/seo/meta-tags";
 
@@ -24,6 +29,16 @@ export default function Admin() {
         return <ContentEditor />;
       case "content-manager":
         return <ContentManager />;
+      case "pages":
+        return <PageManager />;
+      case "menus":
+        return <MenuManager />;
+      case "landing-page":
+        return <LandingPageManager />;
+      case "blocks":
+        return <BlocksLibrary />;
+      case "header":
+        return <HeaderCustomizer />;
       case "events":
         return <EventManager />;
       case "testimonials":

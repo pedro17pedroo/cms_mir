@@ -2,7 +2,8 @@ import {
   users, heroSlides, aboutContent, serviceSchedules, messages, 
   testimonials, bibleVerse, siteSettings, events, blogPosts, 
   donations, donationCampaigns, videos, newsletterSubscribers, 
-  eventRegistrations, blogComments,
+  eventRegistrations, blogComments, pages, menuItems, landingPageSections,
+  contentBlocks, headerConfig, footerConfig,
   type User, type InsertUser, type HeroSlide, type InsertHeroSlide,
   type AboutContent, type InsertAboutContent, type ServiceSchedule, type InsertServiceSchedule,
   type Message, type InsertMessage, type Testimonial, type InsertTestimonial,
@@ -10,7 +11,10 @@ import {
   type Event, type InsertEvent, type BlogPost, type InsertBlogPost,
   type Donation, type InsertDonation, type DonationCampaign, type InsertDonationCampaign,
   type Video, type InsertVideo, type NewsletterSubscriber, type InsertNewsletterSubscriber,
-  type EventRegistration, type InsertEventRegistration, type BlogComment, type InsertBlogComment
+  type EventRegistration, type InsertEventRegistration, type BlogComment, type InsertBlogComment,
+  type Page, type InsertPage, type MenuItem, type InsertMenuItem,
+  type LandingPageSection, type InsertLandingPageSection, type ContentBlock, type InsertContentBlock,
+  type HeaderConfig, type InsertHeaderConfig, type FooterConfig, type InsertFooterConfig
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -108,6 +112,43 @@ export interface IStorage {
   createBlogComment(comment: InsertBlogComment): Promise<BlogComment>;
   approveBlogComment(id: number): Promise<BlogComment | undefined>;
   deleteBlogComment(id: number): Promise<boolean>;
+
+  // Pages methods
+  getPages(): Promise<Page[]>;
+  getPage(id: number): Promise<Page | undefined>;
+  getPageBySlug(slug: string): Promise<Page | undefined>;
+  createPage(page: InsertPage): Promise<Page>;
+  updatePage(id: number, page: Partial<InsertPage>): Promise<Page | undefined>;
+  deletePage(id: number): Promise<boolean>;
+
+  // Menu items methods
+  getMenuItems(): Promise<MenuItem[]>;
+  getMenuItem(id: number): Promise<MenuItem | undefined>;
+  createMenuItem(item: InsertMenuItem): Promise<MenuItem>;
+  updateMenuItem(id: number, item: Partial<InsertMenuItem>): Promise<MenuItem | undefined>;
+  deleteMenuItem(id: number): Promise<boolean>;
+
+  // Landing page sections methods
+  getLandingPageSections(): Promise<LandingPageSection[]>;
+  getLandingPageSection(id: number): Promise<LandingPageSection | undefined>;
+  createLandingPageSection(section: InsertLandingPageSection): Promise<LandingPageSection>;
+  updateLandingPageSection(id: number, section: Partial<InsertLandingPageSection>): Promise<LandingPageSection | undefined>;
+  deleteLandingPageSection(id: number): Promise<boolean>;
+
+  // Content blocks methods
+  getContentBlocks(): Promise<ContentBlock[]>;
+  getContentBlock(id: number): Promise<ContentBlock | undefined>;
+  createContentBlock(block: InsertContentBlock): Promise<ContentBlock>;
+  updateContentBlock(id: number, block: Partial<InsertContentBlock>): Promise<ContentBlock | undefined>;
+  deleteContentBlock(id: number): Promise<boolean>;
+
+  // Header config methods
+  getHeaderConfig(): Promise<HeaderConfig | undefined>;
+  updateHeaderConfig(config: InsertHeaderConfig): Promise<HeaderConfig>;
+
+  // Footer config methods
+  getFooterConfig(): Promise<FooterConfig | undefined>;
+  updateFooterConfig(config: InsertFooterConfig): Promise<FooterConfig>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -547,6 +588,191 @@ export class DatabaseStorage implements IStorage {
   async deleteBlogComment(id: number): Promise<boolean> {
     const result = await db.delete(blogComments).where(eq(blogComments.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  // Pages methods
+  async getPages(): Promise<Page[]> {
+    const pagesList = await db.select().from(pages).orderBy(pages.order);
+    return pagesList;
+  }
+
+  async getPage(id: number): Promise<Page | undefined> {
+    const [page] = await db.select().from(pages).where(eq(pages.id, id));
+    return page || undefined;
+  }
+
+  async getPageBySlug(slug: string): Promise<Page | undefined> {
+    const [page] = await db.select().from(pages).where(eq(pages.slug, slug));
+    return page || undefined;
+  }
+
+  async createPage(page: InsertPage): Promise<Page> {
+    const [newPage] = await db
+      .insert(pages)
+      .values(page)
+      .returning();
+    return newPage;
+  }
+
+  async updatePage(id: number, page: Partial<InsertPage>): Promise<Page | undefined> {
+    const [updated] = await db
+      .update(pages)
+      .set(page)
+      .where(eq(pages.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deletePage(id: number): Promise<boolean> {
+    const result = await db.delete(pages).where(eq(pages.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Menu items methods
+  async getMenuItems(): Promise<MenuItem[]> {
+    const menuItemsList = await db.select().from(menuItems).orderBy(menuItems.order);
+    return menuItemsList;
+  }
+
+  async getMenuItem(id: number): Promise<MenuItem | undefined> {
+    const [item] = await db.select().from(menuItems).where(eq(menuItems.id, id));
+    return item || undefined;
+  }
+
+  async createMenuItem(item: InsertMenuItem): Promise<MenuItem> {
+    const [newItem] = await db
+      .insert(menuItems)
+      .values(item)
+      .returning();
+    return newItem;
+  }
+
+  async updateMenuItem(id: number, item: Partial<InsertMenuItem>): Promise<MenuItem | undefined> {
+    const [updated] = await db
+      .update(menuItems)
+      .set(item)
+      .where(eq(menuItems.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteMenuItem(id: number): Promise<boolean> {
+    const result = await db.delete(menuItems).where(eq(menuItems.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Landing page sections methods
+  async getLandingPageSections(): Promise<LandingPageSection[]> {
+    const sectionsList = await db.select().from(landingPageSections).orderBy(landingPageSections.order);
+    return sectionsList;
+  }
+
+  async getLandingPageSection(id: number): Promise<LandingPageSection | undefined> {
+    const [section] = await db.select().from(landingPageSections).where(eq(landingPageSections.id, id));
+    return section || undefined;
+  }
+
+  async createLandingPageSection(section: InsertLandingPageSection): Promise<LandingPageSection> {
+    const [newSection] = await db
+      .insert(landingPageSections)
+      .values(section)
+      .returning();
+    return newSection;
+  }
+
+  async updateLandingPageSection(id: number, section: Partial<InsertLandingPageSection>): Promise<LandingPageSection | undefined> {
+    const [updated] = await db
+      .update(landingPageSections)
+      .set(section)
+      .where(eq(landingPageSections.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteLandingPageSection(id: number): Promise<boolean> {
+    const result = await db.delete(landingPageSections).where(eq(landingPageSections.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Content blocks methods
+  async getContentBlocks(): Promise<ContentBlock[]> {
+    const blocksList = await db.select().from(contentBlocks).orderBy(contentBlocks.createdAt);
+    return blocksList;
+  }
+
+  async getContentBlock(id: number): Promise<ContentBlock | undefined> {
+    const [block] = await db.select().from(contentBlocks).where(eq(contentBlocks.id, id));
+    return block || undefined;
+  }
+
+  async createContentBlock(block: InsertContentBlock): Promise<ContentBlock> {
+    const [newBlock] = await db
+      .insert(contentBlocks)
+      .values(block)
+      .returning();
+    return newBlock;
+  }
+
+  async updateContentBlock(id: number, block: Partial<InsertContentBlock>): Promise<ContentBlock | undefined> {
+    const [updated] = await db
+      .update(contentBlocks)
+      .set(block)
+      .where(eq(contentBlocks.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteContentBlock(id: number): Promise<boolean> {
+    const result = await db.delete(contentBlocks).where(eq(contentBlocks.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Header config methods
+  async getHeaderConfig(): Promise<HeaderConfig | undefined> {
+    const [config] = await db.select().from(headerConfig).limit(1);
+    return config || undefined;
+  }
+
+  async updateHeaderConfig(config: InsertHeaderConfig): Promise<HeaderConfig> {
+    const existing = await this.getHeaderConfig();
+    if (existing) {
+      const [updated] = await db
+        .update(headerConfig)
+        .set(config)
+        .where(eq(headerConfig.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [newConfig] = await db
+        .insert(headerConfig)
+        .values(config)
+        .returning();
+      return newConfig;
+    }
+  }
+
+  // Footer config methods
+  async getFooterConfig(): Promise<FooterConfig | undefined> {
+    const [config] = await db.select().from(footerConfig).limit(1);
+    return config || undefined;
+  }
+
+  async updateFooterConfig(config: InsertFooterConfig): Promise<FooterConfig> {
+    const existing = await this.getFooterConfig();
+    if (existing) {
+      const [updated] = await db
+        .update(footerConfig)
+        .set(config)
+        .where(eq(footerConfig.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [newConfig] = await db
+        .insert(footerConfig)
+        .values(config)
+        .returning();
+      return newConfig;
+    }
   }
 }
 

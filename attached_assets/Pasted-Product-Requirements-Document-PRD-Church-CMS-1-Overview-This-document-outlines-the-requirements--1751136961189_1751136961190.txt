@@ -1,0 +1,298 @@
+Product Requirements Document (PRD): Church CMS
+1. Overview
+This document outlines the requirements for a Content Management System (CMS) tailored for a church, designed to manage all website content, sessions, and integrations with social media and streaming platforms. The CMS will provide an adjustable, modern, and user-friendly interface based on the provided design theme (as per attached images). It will support comprehensive content management, including landing pages, menus, headers, carousels, content sections, events, blog, donations, about pages, and video integrations. The project considers the current date and time as 07:49 PM WAT on Saturday, June 28, 2025.
+2. Objectives
+
+Provide a flexible and scalable CMS for the church to manage all website content and sessions.
+Enable seamless integration with YouTube for video content and live streaming, as well as social media platforms (Facebook, WhatsApp, Instagram).
+Ensure a responsive, modern, and visually appealing design based on the provided theme.
+Facilitate easy management of events, donations, blogs, and other dynamic content.
+Ensure secure and efficient backend operations for content storage and user management.
+
+3. Target Audience
+
+Church administrators and content managers (non-technical users).
+Church members and visitors accessing the website.
+Donors contributing through the platform.
+Social media and streaming audiences engaging with church content.
+
+4. Functional Requirements
+4.1. Frontend Features
+
+Tech Stack: ReactJS, Tailwind CSS, Vite.
+Responsive Design: Fully responsive interface compatible with desktop, tablet, and mobile devices, following the provided theme.
+Landing Page:
+Customizable hero section with a carousel for featured content (images, text, CTAs) reflecting current events (e.g., upcoming on June 28, 2025).
+Dynamic sections for announcements, upcoming events, and recent sermons, with a management module to select sections, define their order via drag-and-drop, and add, edit, delete, activate, or deactivate sections.
+
+
+Menus and Header:
+Fully dynamic horizontal navigation menu with options (Início, Sobre, Serviços, Ensinos, Plataforma de Ensino, Eventos e Blogs, Contato) and support for dropdown submenus (e.g., Sobre with subitems).
+Customizable header with real-time adjustments to text, colors, menu structure, and logo (upload, resize, reposition).
+Menus are dynamic, allowing creation, deletion, activation, or deactivation, with the ability to associate pages (existing or new) that open when clicked.
+
+
+Content Management:
+Drag-and-drop interface for managing page layouts and sections.
+Support for rich text, images, videos, and embeds in content sections.
+
+
+Events:
+Calendar view for upcoming events, starting with events planned post-June 28, 2025.
+CRUD (Create, Read, Update, Delete) functionality for event details (title, date, time, location, description, images).
+RSVP or registration forms for events.
+
+
+Blog:
+Blog post management with categories, tags, and author details.
+Support for rich media (images, videos, embeds).
+Commenting system (optional, toggleable).
+
+
+Donations:
+Secure donation form with integration for payment gateways (e.g., Stripe, PayPal).
+Recurring donation options and donation history for logged-in users.
+Customizable donation campaigns with progress bars.
+
+
+About Page:
+Editable sections for church history, mission, vision, and staff profiles.
+Support for multimedia (photos, videos).
+
+
+Video Section:
+Integration with YouTube API for embedding sermon videos and playlists.
+Live streaming support via YouTube Live or other streaming platforms, schedulable from June 28, 2025, onward.
+Video gallery with filtering by category or date.
+
+
+Testemunhos de Fé:
+Editable section with cards containing name, location, circular placeholder image, and testimony text.
+Navigation with arrows and "Ver todos" button for additional testimonies.
+
+
+Galeria de Eventos/Mensagens:
+Gallery with thumbnails, titles (e.g., "Estudo Bíblico: Explorando as Parábolas de Jesus"), descriptions, and "Ver todos" button.
+
+
+Social Media Integration:
+Share buttons for content (Facebook, WhatsApp, Instagram).
+Embedded social media feeds (e.g., Instagram posts, Facebook page updates).
+WhatsApp integration for direct messaging or group links.
+
+
+Live Streaming:
+Dedicated section for live streaming with embedded player (YouTube Live or similar), with capability to schedule streams post-07:49 PM WAT, June 28, 2025.
+Schedule display for upcoming live events.
+
+
+Footer:
+Editable sections for address, main links, "Sobre Nós" (with subitems like Ministério, No que Cremos), conferences, social media icons, contact number, and newsletter form.
+
+
+SEO and Analytics:
+SEO-friendly URLs and meta tags editable via CMS.
+Integration with Google Analytics for tracking website performance.
+
+
+
+4.2. Backend Features
+
+Tech Stack: Node.js, Express, PostgreSQL (for structured data like users and events), MongoDB (for flexible content storage).
+Content Management API:
+RESTful API for CRUD operations on all content types (pages, events, blog posts, testimonies, etc.).
+Authentication and role-based access control (admin, editor, viewer).
+
+
+Database:
+PostgreSQL: Store user data, event details, donation records, and other structured data.
+MongoDB: Store dynamic content (pages, blog posts, carousel items, testimonies) for flexibility.
+
+
+File Storage:
+Integration with cloud storage (e.g., AWS S3 or Cloudinary) for images and videos.
+
+
+Security:
+JWT-based authentication for admin users.
+Input validation and sanitization to prevent SQL injection and XSS attacks.
+HTTPS for secure data transmission.
+
+
+Scalability:
+Horizontal scaling support for Node.js backend.
+Caching (e.g., Redis) for frequently accessed content like landing page data.
+
+
+Architecture:
+Clean Architecture: Separate concerns into layers (Presentation, Application, Domain, Infrastructure) to ensure maintainability and testability.
+Modular Design: Organize code into independent modules (e.g., User Management, Content Management, Event Management) for better scalability and reusability.
+Domain-Driven Design (DDD): Model the backend around domain entities (e.g., User, Event, Testimony) with bounded contexts to align with business logic and facilitate complex domain requirements.
+Design Patterns:
+Repository Pattern: Abstract data access for entities, improving testability and decoupling from data sources.
+Service Pattern: Encapsulate business logic in services for better separation of concerns.
+Factory Pattern: Use for creating objects (e.g., event types) to promote flexibility and consistency.
+Observer Pattern: Implement for real-time updates (e.g., live streaming status) to notify subscribers.
+
+
+Best Practices:
+Follow SOLID principles for robust and maintainable code.
+Use dependency injection to manage components and enhance testability.
+Implement logging and monitoring (e.g., with Winston or Prometheus) for debugging and performance tracking.
+Adopt consistent error handling and API versioning for future scalability.
+
+
+
+
+
+4.3. Admin Dashboard
+
+User Interface: React-based admin panel styled with Tailwind CSS.
+Features:
+Dashboard with analytics (e.g., visitor stats, donation totals, event registrations) updated as of June 28, 2025.
+Content editor for pages, menus, headers, carousels, testimonies, and galleries.
+Event management with calendar integration, starting from June 28, 2025.
+Blog post editor with preview functionality.
+Donation management (view transactions, export reports).
+User management (admin, editors, moderators).
+Video and streaming management (YouTube API integration for uploads and live streams).
+Social media configuration (API keys, feed settings).
+Management panel for administrators to oversee all content, events, and user activities with real-time updates.
+
+
+Access Management:
+Role-based access control system based on users, modules, profiles, and permissions.
+User profiles with customizable roles (e.g., admin, content editor, event manager) and module-specific permissions (e.g., edit pages, manage events, view analytics).
+Permission settings to restrict or allow access to specific functionalities (e.g., CRUD operations, live stream scheduling) based on user role.
+
+
+Page Management:
+Module for managing default pages (e.g., Início, Sobre) and custom pages created by administrators.
+Visual editor with drag-and-drop functionality for building page structures and content, similar to Elementor, using pre-defined elements (text, images, videos, buttons, forms).
+Library of reusable blocks (e.g., headers, footers, testimony sections) with advanced customization (styles, animations, responsive layouts).
+Version history and auto-save drafts for page edits.
+
+
+Landing Page Management:
+Dedicated module to configure the landing page, allowing selection of sections, ordering via drag-and-drop, and adding, editing, deleting, activating, or deactivating sections.
+
+
+Link Generation:
+Automatically generate unique, editable links for all created pages, embeddable anywhere on the site, opening the corresponding page when clicked.
+
+
+
+5. Non-Functional Requirements
+
+Performance: Page load time under 2 seconds for 95% of requests under normal conditions.
+Scalability: Support up to 10,000 concurrent users during live streaming events.
+Accessibility: WCAG 2.1 Level AA compliance for accessibility.
+Security: GDPR and CCPA compliance for user data protection.
+Uptime: 99.9% uptime for the website and CMS.
+Cross-Browser Compatibility: Support for Chrome, Firefox, Safari, and Edge (latest two versions).
+
+6. Integrations
+
+YouTube API: For video embedding and live streaming.
+Facebook API: For social sharing and embedded feeds.
+Instagram API: For displaying Instagram posts.
+WhatsApp API: For direct messaging or group links.
+Payment Gateways: Stripe and PayPal for donations.
+Google Analytics: For website performance tracking.
+Cloud Storage: AWS S3 or Cloudinary for media storage.
+
+7. Design Specifications
+
+Theme: Based on provided images, featuring a clean, modern, and inspirational design with a color palette of yellow, orange, purple, and black, and bold typography for titles (e.g., "TESTEMUNHOS DE FÉ").
+Typography: Use Google Fonts (e.g., Roboto, Open Sans) or custom fonts as per the design.
+Color Scheme: Incorporate yellow (header/footer), purple (testimonies), and orange (buttons/events) from the images.
+Components:
+Reusable React components for headers, footers, carousels, testimony cards, and gallery items.
+Tailwind CSS for responsive and utility-first styling, including circular placeholders and rounded buttons.
+
+
+
+8. Development Plan
+8.1. Milestones
+
+Planning and Setup (2 weeks, starting June 28, 2025):
+Finalize requirements and design mockups.
+Set up React, Vite, Node.js, Express, PostgreSQL, and MongoDB environments.
+
+
+Frontend Development (6 weeks):
+Build landing page, menus, header, and core content sections.
+Implement video, events, blog, testimonies, and gallery sections.
+Integrate social media and streaming features.
+
+
+Backend Development (6 weeks):
+Develop RESTful API for content and user management.
+Set up PostgreSQL and MongoDB schemas.
+Integrate cloud storage and payment gateways.
+
+
+Admin Dashboard (4 weeks):
+Build admin panel with content and user management features.
+Integrate analytics and reporting.
+
+
+Testing and QA (3 weeks):
+Perform unit, integration, and end-to-end testing.
+Ensure accessibility and cross-browser compatibility.
+
+
+Deployment and Launch (2 weeks):
+Deploy to production environment (e.g., Vercel for frontend, AWS/Heroku for backend).
+Conduct final user acceptance testing.
+
+
+
+8.2. Team
+
+Frontend Developer: ReactJS, Tailwind CSS, Vite.
+Backend Developer: Node.js, Express, PostgreSQL, MongoDB.
+UI/UX Designer: Create mockups based on provided theme.
+DevOps Engineer: Manage deployment, cloud storage, and scalability.
+QA Engineer: Ensure functionality, performance, and accessibility.
+
+9. Success Metrics
+
+User Engagement: 50% increase in website visitors within 3 months of launch.
+Donations: 20% increase in online donations within 6 months.
+Event Participation: 30% increase in event registrations via the CMS.
+Content Updates: Admins can update content in under 5 minutes.
+Streaming Reliability: 99% uptime during live streaming events.
+
+10. Risks and Mitigation
+
+Risk: Integration issues with YouTube or payment gateways.
+Mitigation: Use well-documented APIs and test integrations thoroughly.
+
+
+Risk: Performance issues during high traffic (e.g., live streams).
+Mitigation: Implement caching and scalable infrastructure.
+
+
+Risk: Non-technical admins struggling with CMS.
+Mitigation: Provide user-friendly interface and documentation.
+
+
+
+11. Future Enhancements
+
+Multilingual support for diverse congregations.
+Mobile app version of the CMS.
+AI-driven content recommendations for users.
+Integration with additional streaming platforms (e.g., Vimeo, Zoom).
+
+12. Additional Features
+
+Theme and Template Management: Support for creating and applying custom themes and pre-defined templates (e.g., event pages, donation pages).
+Plugin System: Allow extension via modules for advanced features (e.g., forms, galleries, email marketing integration).
+Multilanguage Support: Enable content translation with per-language editing and user language detection.
+User Customization: Allow admins to personalize the dashboard (e.g., widgets, themes).
+Backup and Recovery: Automatic and manual backups with restore options.
+Integrated Help: In-panel tutorials and support forum.
+Performance Analytics: Detailed insights (e.g., page load times, click tracking).
+Mobile Compatibility: Full responsiveness with device simulation in the editor.
