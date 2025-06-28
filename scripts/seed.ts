@@ -447,6 +447,7 @@ async function seed() {
     // 17. Create Pages
     console.log("📄 Creating pages...");
     await db.insert(pages).values([
+      // Página principal
       {
         title: "Início",
         slug: "inicio",
@@ -464,22 +465,231 @@ async function seed() {
         metaDescription: "Bem-vindos à Igreja MIR. Uma comunidade de fé que transforma vidas através do amor de Cristo.",
         order: 1
       },
+      
+      // Páginas principais
       {
         title: "Sobre Nós",
         slug: "sobre",
-        content: JSON.stringify({
-          sections: [
-            { type: "vision", config: {} },
-            { type: "mission", config: {} },
-            { type: "beliefs", config: {} },
-            { type: "staff", config: { showAll: true } }
-          ]
-        }),
+        content: "Página sobre a igreja com visão, missão e valores",
         isPublished: true,
-        isDefault: true,
         metaTitle: "Sobre Nós - Igreja MIR",
         metaDescription: "Conheça nossa visão, missão e crenças. Saiba mais sobre nossa história e equipe pastoral.",
         order: 2
+      },
+      {
+        title: "Serviços",
+        slug: "servicos",
+        content: "Horários de cultos e serviços da igreja",
+        isPublished: true,
+        metaTitle: "Serviços - Igreja MIR",
+        metaDescription: "Confira os horários dos nossos cultos e serviços religiosos.",
+        order: 3
+      },
+      {
+        title: "Ensino",
+        slug: "ensino",
+        content: "Mensagens e estudos bíblicos",
+        isPublished: true,
+        metaTitle: "Ensinos - Igreja MIR",
+        metaDescription: "Acesse nossas mensagens, pregações e estudos bíblicos.",
+        order: 4
+      },
+      {
+        title: "Plataforma de Ensino",
+        slug: "plataforma-ensino",
+        content: "Hub principal de cursos e conferências",
+        isPublished: true,
+        metaTitle: "Plataforma de Ensino - Igreja MIR",
+        metaDescription: "Acesse cursos, conferências e materiais educacionais do MIR.",
+        order: 5
+      },
+      {
+        title: "Eventos e Blogs",
+        slug: "eventos-blogs",
+        content: "Eventos próximos e artigos do blog",
+        isPublished: true,
+        metaTitle: "Eventos e Blogs - Igreja MIR",
+        metaDescription: "Fique por dentro dos nossos eventos e leia os artigos mais recentes.",
+        order: 6
+      },
+      {
+        title: "Contacto",
+        slug: "contato",
+        content: "Informações de contacto da igreja",
+        isPublished: true,
+        metaTitle: "Contacto - Igreja MIR",
+        metaDescription: "Entre em contacto connosco. Endereço, telefone e formulário de contacto.",
+        order: 7
+      },
+      
+      // Subpáginas do Sobre
+      {
+        title: "Ministério",
+        slug: "sobre/ministerio",
+        content: "História e missão do Ministério Internacional de Restauração",
+        isPublished: true,
+        metaTitle: "Ministério - Igreja MIR",
+        metaDescription: "Conheça a história e missão do Ministério Internacional de Restauração.",
+        order: 8
+      },
+      {
+        title: "No que Cremos",
+        slug: "sobre/cremos",
+        content: "Crenças fundamentais e declaração de fé",
+        isPublished: true,
+        metaTitle: "No que Cremos - Igreja MIR",
+        metaDescription: "Nossas crenças fundamentais baseadas na Palavra de Deus.",
+        order: 9
+      },
+      {
+        title: "Presidente do MIR",
+        slug: "sobre/presidente",
+        content: "Biografia e ministério do presidente do MIR",
+        isPublished: true,
+        metaTitle: "Presidente do MIR - Igreja MIR",
+        metaDescription: "Conheça o líder e fundador do Ministério Internacional de Restauração.",
+        order: 10
+      },
+      
+      // Subpáginas do Ensino
+      {
+        title: "Ensinos em Áudio",
+        slug: "ensino/audio",
+        content: "Biblioteca de mensagens e estudos em áudio",
+        isPublished: true,
+        metaTitle: "Ensinos em Áudio - Igreja MIR",
+        metaDescription: "Acesse nossa biblioteca de mensagens e estudos bíblicos em formato de áudio.",
+        order: 11
+      },
+      {
+        title: "Ensinos em Vídeo",
+        slug: "ensino/video",
+        content: "Vídeos de ensino, pregações e estudos bíblicos",
+        isPublished: true,
+        metaTitle: "Ensinos em Vídeo - Igreja MIR",
+        metaDescription: "Assista aos nossos vídeos de ensino, pregações e estudos bíblicos.",
+        order: 12
+      },
+      
+      // Subpáginas da Plataforma de Ensino
+      {
+        title: "Conferência da Fé",
+        slug: "plataforma-ensino/conferencia-fe",
+        content: "Evento anual focado no fortalecimento da fé",
+        isPublished: true,
+        metaTitle: "Conferência da Fé - Igreja MIR",
+        metaDescription: "Evento anual focado no fortalecimento da fé e crescimento espiritual.",
+        order: 13
+      },
+      {
+        title: "Escola de Fundação",
+        slug: "plataforma-ensino/escola-fundacao",  
+        content: "Curso fundamental para novos convertidos",
+        isPublished: true,
+        metaTitle: "Escola de Fundação - Igreja MIR",
+        metaDescription: "Curso fundamental para novos convertidos e membros da igreja.",
+        order: 14
+      },
+      {
+        title: "Conferência de Ministros",
+        slug: "plataforma-ensino/conferencia-ministros",
+        content: "Treinamento e capacitação para líderes ministeriais",
+        isPublished: true,
+        metaTitle: "Conferência de Ministros - Igreja MIR", 
+        metaDescription: "Treinamento e capacitação para líderes ministeriais.",
+        order: 15
+      },
+      {
+        title: "Conferência de Mulheres",
+        slug: "plataforma-ensino/conferencia-mulheres",
+        content: "Encontro especial focado em crescimento espiritual",
+        isPublished: true,
+        metaTitle: "Conferência de Mulheres - Igreja MIR",
+        metaDescription: "Encontro especial focado em crescimento espiritual e propósito.",
+        order: 16
+      },
+      {
+        title: "Conferência dos Jovens", 
+        slug: "plataforma-ensino/conferencia-jovens",
+        content: "Evento voltado para jovens com foco em identidade cristã",
+        isPublished: true,
+        metaTitle: "Conferência dos Jovens - Igreja MIR",
+        metaDescription: "Evento voltado para jovens com foco em identidade e chamado cristão.",
+        order: 17
+      },
+      {
+        title: "Mulheres Transformadas",
+        slug: "plataforma-ensino/mulheres-transformadas", 
+        content: "Ministério dedicado ao empoderamento de mulheres",
+        isPublished: true,
+        metaTitle: "Mulheres Transformadas - Igreja MIR",
+        metaDescription: "Ministério dedicado ao empoderamento de mulheres através de Cristo.",
+        order: 18
+      },
+      {
+        title: "Reis e Sacerdotes",
+        slug: "plataforma-ensino/reis-sacerdotes",
+        content: "Curso sobre identidade e autoridade espiritual",
+        isPublished: true,
+        metaTitle: "Reis e Sacerdotes - Igreja MIR", 
+        metaDescription: "Curso sobre identidade e autoridade espiritual no Reino de Deus.",
+        order: 19
+      },
+      
+      // Outras páginas existentes
+      {
+        title: "Eventos",
+        slug: "eventos",
+        content: "Lista completa de eventos da igreja",
+        isPublished: true,
+        metaTitle: "Eventos - Igreja MIR",
+        metaDescription: "Confira todos os eventos, conferências e atividades da nossa igreja.",
+        order: 20
+      },
+      {
+        title: "Blog",
+        slug: "blog", 
+        content: "Artigos e reflexões espirituais",
+        isPublished: true,
+        metaTitle: "Blog - Igreja MIR",
+        metaDescription: "Leia nossos artigos, reflexões e estudos sobre vida cristã.",
+        order: 21
+      },
+      {
+        title: "Doações",
+        slug: "doacoes",
+        content: "Informações sobre doações e contribuições",
+        isPublished: true,
+        metaTitle: "Doações - Igreja MIR",
+        metaDescription: "Faça sua contribuição para a obra de Deus através da nossa igreja.",
+        order: 22
+      },
+      {
+        title: "Vídeos",
+        slug: "videos",
+        content: "Galeria de vídeos da igreja",
+        isPublished: true,
+        metaTitle: "Vídeos - Igreja MIR", 
+        metaDescription: "Assista aos vídeos dos nossos cultos, eventos e atividades.",
+        order: 23
+      },
+      {
+        title: "Admin",
+        slug: "admin",
+        content: "Painel administrativo da igreja",
+        isPublished: false,
+        metaTitle: "Admin - Igreja MIR",
+        metaDescription: "Painel administrativo para gestão do site da igreja.",
+        order: 24
+      },
+      {
+        title: "Login",
+        slug: "login",
+        content: "Página de login para administradores",
+        isPublished: false,
+        metaTitle: "Login - Igreja MIR",
+        metaDescription: "Login para acesso ao painel administrativo.",
+        order: 25
       }
     ]);
 
