@@ -606,11 +606,11 @@ export default function BlogManager() {
                       </div>
                     )}
                     
-                    {form.watch("tags") && form.watch("tags").length > 0 && (
+                    {form.watch("tags") && Array.isArray(form.watch("tags")) && form.watch("tags")!.length > 0 && (
                       <div className="mt-6 pt-6 border-t">
                         <h4 className="text-sm font-medium text-gray-900 mb-2">Tags:</h4>
                         <div className="flex flex-wrap gap-2">
-                          {form.watch("tags").map((tag, index) => (
+                          {form.watch("tags")!.map((tag, index) => (
                             <Badge key={index} variant="secondary" className="text-xs">
                               {tag}
                             </Badge>
