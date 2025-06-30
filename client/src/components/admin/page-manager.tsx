@@ -13,8 +13,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPageSchema, type Page, type InsertPage } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, Edit, Trash2, Eye, EyeOff, ExternalLink, GripVertical } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, ExternalLink, GripVertical, Paintbrush } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import PageBuilder, { type PageElement } from "@/components/page-builder/page-builder";
 
 interface PageManagerProps {}
 
