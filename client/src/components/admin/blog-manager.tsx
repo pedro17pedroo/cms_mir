@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertBlogPostSchema, type BlogPost, type InsertBlogPost } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import RichTextEditor from "@/components/ui/rich-text-editor";
+import SimpleRichTextEditor from "@/components/ui/simple-rich-text-editor";
 import BlogContentViewer from "@/components/blog/blog-content-viewer";
 
 const categories = [
@@ -462,7 +462,7 @@ export default function BlogManager() {
                       <FormItem>
                         <FormLabel>Conteúdo *</FormLabel>
                         <FormControl>
-                          <RichTextEditor
+                          <SimpleRichTextEditor
                             content={field.value || ""}
                             onChange={field.onChange}
                             placeholder="Escreva o conteúdo completo do artigo..."
