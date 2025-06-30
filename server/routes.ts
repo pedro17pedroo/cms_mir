@@ -670,15 +670,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/menu-items", async (req, res) => {
     try {
+      console.log("Creating menu item with data:", req.body);
       const menuItem = insertMenuItemSchema.parse(req.body);
+      console.log("Parsed menu item:", menuItem);
       const newMenuItem = await storage.createMenuItem(menuItem);
       res.json(newMenuItem);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid menu item data" });
+    } catch (error: any) {
+      console.error("Menu item creation error:", error);
+      res.status(400).json({ error: "Invalid menu item data", details: error?.message || "Unknown error" });
     }
   });
 
-  app.put("/api/menu-items/:id", async (req, res) => {
+  app.patch("/api/menu-items/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const menuItem = insertMenuItemSchema.partial().parse(req.body);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,9 +51,9 @@ export default function MenuManager({}: MenuManagerProps) {
       });
       
       if (!response.ok) {
-        const error = await response.text();
-        console.error("Menu item creation failed:", error);
-        throw new Error(error);
+        const errorData = await response.json();
+        console.error("Menu item creation failed:", errorData);
+        throw new Error(errorData.details || errorData.error || "Unknown error");
       }
       
       return response.json();
@@ -66,7 +66,11 @@ export default function MenuManager({}: MenuManagerProps) {
     },
     onError: (error) => {
       console.error("Menu item creation error:", error);
-      toast({ title: "Erro ao criar item de menu", variant: "destructive" });
+      toast({ 
+        title: "Erro ao criar item de menu", 
+        description: error.message,
+        variant: "destructive" 
+      });
     },
   });
 
@@ -76,7 +80,10 @@ export default function MenuManager({}: MenuManagerProps) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then(res => res.json()),
+      }).then(res => {
+        if (!res.ok) throw new Error("Failed to update menu item");
+        return res.json();
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-items"] });
       setIsDialogOpen(false);
@@ -93,7 +100,10 @@ export default function MenuManager({}: MenuManagerProps) {
     mutationFn: (id: number) => 
       fetch(`/api/menu-items/${id}`, {
         method: "DELETE",
-      }).then(res => res.json()),
+      }).then(res => {
+        if (!res.ok) throw new Error("Failed to delete menu item");
+        return res.json();
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-items"] });
       toast({ title: "Item de menu removido com sucesso!" });
@@ -109,10 +119,12 @@ export default function MenuManager({}: MenuManagerProps) {
     
     // Clean up the data before submission
     const cleanData = {
-      ...data,
-      parentId: data.parentId === undefined ? null : data.parentId,
+      title: data.title,
+      url: data.url,
+      parentId: data.parentId || null,
       icon: data.icon || null,
-      order: data.order || 0
+      order: data.order || 0,
+      isActive: data.isActive !== false
     };
     
     console.log("Clean data to submit:", cleanData);
@@ -130,8 +142,8 @@ export default function MenuManager({}: MenuManagerProps) {
       title: item.title,
       url: item.url,
       parentId: item.parentId || undefined,
-      order: item.order,
-      isActive: item.isActive,
+      order: item.order || 0,
+      isActive: item.isActive !== false,
       icon: item.icon || "",
     });
     setIsDialogOpen(true);
@@ -139,7 +151,14 @@ export default function MenuManager({}: MenuManagerProps) {
 
   const handleNewItem = () => {
     setEditingItem(null);
-    form.reset();
+    form.reset({
+      title: "",
+      url: "",
+      parentId: undefined,
+      order: 0,
+      isActive: true,
+      icon: "",
+    });
     setIsDialogOpen(true);
   };
 
@@ -263,17 +282,17 @@ export default function MenuManager({}: MenuManagerProps) {
                                   <SelectValue placeholder="Selecione uma página ou digite URL" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="/">/inicio</SelectItem>
-                                  <SelectItem value="/sobre">/sobre</SelectItem>
-                                  <SelectItem value="/servicos">/servicos</SelectItem>
-                                  <SelectItem value="/ensinos">/ensinos</SelectItem>
-                                  <SelectItem value="/eventos">/eventos</SelectItem>
-                                  <SelectItem value="/blog">/blog</SelectItem>
-                                  <SelectItem value="/videos">/videos</SelectItem>
-                                  <SelectItem value="/doacoes">/doacoes</SelectItem>
-                                  <SelectItem value="/contato">/contato</SelectItem>
+                                  <SelectItem value="inicio">/ - Início</SelectItem>
+                                  <SelectItem value="sobre">/sobre - Sobre</SelectItem>
+                                  <SelectItem value="servicos">/servicos - Serviços</SelectItem>
+                                  <SelectItem value="ensinos">/ensinos - Ensinos</SelectItem>
+                                  <SelectItem value="eventos">/eventos - Eventos</SelectItem>
+                                  <SelectItem value="blog">/blog - Blog</SelectItem>
+                                  <SelectItem value="videos">/videos - Vídeos</SelectItem>
+                                  <SelectItem value="doacoes">/doacoes - Doações</SelectItem>
+                                  <SelectItem value="contato">/contato - Contato</SelectItem>
                                   {pages.map((page: any) => (
-                                    <SelectItem key={page.id} value={`/${page.slug}`}>
+                                    <SelectItem key={`page-${page.id}`} value={`/${page.slug}`}>
                                       /{page.slug} - {page.title}
                                     </SelectItem>
                                   ))}
@@ -302,7 +321,7 @@ export default function MenuManager({}: MenuManagerProps) {
                                 <SelectContent>
                                   <SelectItem value="none">Nenhum (Menu principal)</SelectItem>
                                   {parentMenuItems.map((item) => (
-                                    <SelectItem key={item.id} value={item.id.toString()}>
+                                    <SelectItem key={`parent-${item.id}`} value={item.id.toString()}>
                                       {item.title}
                                     </SelectItem>
                                   ))}
@@ -395,7 +414,7 @@ export default function MenuManager({}: MenuManagerProps) {
                 <p>Nenhum menu encontrado. Crie o primeiro menu.</p>
               </div>
             ) : (
-              organizedMenuItems.map((item) => (
+              organizedMenuItems.map((item, index) => (
                 <div key={item.id} className="space-y-2">
                   {/* Parent Menu Item */}
                   <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
@@ -419,6 +438,7 @@ export default function MenuManager({}: MenuManagerProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => toggleActive(item)}
+                        disabled={updateMenuItemMutation.isPending}
                       >
                         {item.isActive ? (
                           <EyeOff className="h-4 w-4" />
@@ -469,6 +489,7 @@ export default function MenuManager({}: MenuManagerProps) {
                               variant="outline"
                               size="sm"
                               onClick={() => toggleActive(child)}
+                              disabled={updateMenuItemMutation.isPending}
                             >
                               {child.isActive ? (
                                 <EyeOff className="h-4 w-4" />
