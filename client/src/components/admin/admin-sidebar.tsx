@@ -21,7 +21,8 @@ import {
   Blocks,
   Globe,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -71,6 +72,7 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
         { id: "menus", label: "Menus", icon: Menu },
         { id: "messages", label: "Mensagens", icon: MessageSquare },
         { id: "events", label: "Eventos", icon: Calendar },
+        { id: "blog", label: "Blog", icon: BookOpen },
         { id: "testimonials", label: "Testemunhos", icon: Heart }
       ]
     },

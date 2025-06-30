@@ -1,160 +1,173 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, MapPin, Users, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import EventRegistration from "@/components/forms/event-registration";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, MapPin, Users, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 import type { Event } from "@shared/schema";
 
 export default function Events() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-
-  const { data: events = [], isLoading } = useQuery<any[]>({
+  const { data: events, isLoading } = useQuery<Event[]>({
     queryKey: ["/api/events"],
   });
 
-  const categories = ["all", "conference", "worship", "youth", "community"];
-
-  const filteredEvents = selectedCategory === "all" 
-    ? events 
-    : events.filter(event => event.category === selectedCategory);
-
-  const formatDate = (date: string, time: string) => {
-    const dateTime = new Date(`${date} ${time}`);
-    return dateTime.toLocaleDateString('pt-BR', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'conference':
-        return 'bg-[hsl(262,83%,58%)]';
-      case 'worship':
-        return 'bg-[hsl(43,96%,56%)]';
-      case 'youth':
-        return 'bg-[hsl(25,95%,53%)]';
-      case 'community':
-        return 'bg-green-600';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-[hsl(262,83%,58%)] mb-4">
-            Eventos da Igreja
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Participe dos nossos eventos e faça parte desta família de fé
-          </p>
-        </div>
-
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              onClick={() => setSelectedCategory(category)}
-              className={selectedCategory === category ? "bg-[hsl(262,83%,58%)]" : ""}
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </Button>
-          ))}
-        </div>
-
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[hsl(262,83%,58%)] mx-auto"></div>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Carregando eventos...</p>
           </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => (
-              <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="relative">
-                    <img
-                      src={event.imageUrl}
-                      alt={event.title}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?ixlib=rb-4.0.3&w=400&h=300&auto=format&fit=crop';
-                      }}
-                    />
-                    <Badge 
-                      className={`absolute top-2 right-2 ${getCategoryColor(event.category)} text-white`}
-                    >
-                      {event.category}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-xl text-[hsl(262,83%,58%)]">
-                    {event.title}
-                  </CardTitle>
-                  <CardDescription>{event.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-[hsl(43,96%,56%)]" />
-                      {formatDate(event.date, event.time)}
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-[hsl(43,96%,56%)]" />
-                      {event.time}
-                    </div>
-                    <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-2 text-[hsl(43,96%,56%)]" />
-                      {event.location}
-                    </div>
-                    {event.maxAttendees && (
-                      <div className="flex items-center">
-                        <Users className="h-4 w-4 mr-2 text-[hsl(43,96%,56%)]" />
-                        {event.currentAttendees || 0} / {event.maxAttendees} participantes
-                      </div>
-                    )}
-                  </div>
-                  
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="w-full mt-4 bg-[hsl(43,96%,56%)] hover:bg-[hsl(43,96%,46%)]">
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Inscrever-se
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                      <EventRegistration event={event} />
-                    </DialogContent>
-                  </Dialog>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
-        {filteredEvents.length === 0 && !isLoading && (
-          <div className="text-center py-12">
-            <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-xl text-gray-600">
-              Nenhum evento encontrado nesta categoria
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <main>
+        {/* Hero Section */}
+        <section className="bg-gradient-to-br from-purple-900 via-purple-800 to-purple-700 text-white py-24">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+              Eventos da Igreja
+            </h1>
+            <p className="text-xl md:text-2xl text-purple-100 max-w-3xl mx-auto mb-8">
+              Participe dos nossos eventos e fortaleça sua fé em comunidade
             </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Badge variant="secondary" className="px-4 py-2 text-sm">
+                <Calendar className="w-4 h-4 mr-2" />
+                Eventos Agendados
+              </Badge>
+              <Badge variant="secondary" className="px-4 py-2 text-sm">
+                <Users className="w-4 h-4 mr-2" />
+                Inscrições Abertas
+              </Badge>
+            </div>
           </div>
-        )}
-      </main>
+        </section>
 
+        {/* Events Grid */}
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Próximos Eventos
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Não perca os eventos especiais da nossa comunidade
+              </p>
+            </div>
+
+            {events && events.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {events.map((event) => (
+                  <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="aspect-video bg-gradient-to-br from-purple-100 to-orange-100 relative">
+                      {event.imageUrl ? (
+                        <img
+                          src={event.imageUrl}
+                          alt={event.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Calendar className="w-16 h-16 text-purple-400" />
+                        </div>
+                      )}
+                      <Badge className="absolute top-4 left-4 bg-purple-600">
+                        {event.category}
+                      </Badge>
+                    </div>
+                    <CardHeader>
+                      <CardTitle className="text-xl font-bold text-gray-900">
+                        {event.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-gray-600 line-clamp-2">
+                        {event.description}
+                      </p>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Calendar className="w-4 h-4 mr-2 text-purple-600" />
+                          {new Date(event.date).toLocaleDateString('pt-BR')}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Clock className="w-4 h-4 mr-2 text-purple-600" />
+                          {event.time}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <MapPin className="w-4 h-4 mr-2 text-purple-600" />
+                          {event.location}
+                        </div>
+                        {event.maxAttendees && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Users className="w-4 h-4 mr-2 text-purple-600" />
+                            {event.currentAttendees || 0}/{event.maxAttendees} inscritos
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-4">
+                        {event.registrationLink ? (
+                          <Button asChild className="w-full bg-purple-600 hover:bg-purple-700">
+                            <a href={event.registrationLink} target="_blank" rel="noopener noreferrer">
+                              Inscrever-se
+                              <ArrowRight className="w-4 h-4 ml-2" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button variant="outline" className="w-full">
+                            Ver Detalhes
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Nenhum evento agendado
+                </h3>
+                <p className="text-gray-600">
+                  Fique atento! Novos eventos serão publicados em breve.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="bg-gradient-to-r from-orange-500 to-gold-500 text-white py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Quer organizar um evento?
+            </h2>
+            <p className="text-xl mb-8 max-w-2xl mx-auto">
+              Entre em contato conosco para propor ou organizar eventos na nossa igreja
+            </p>
+            <Button asChild size="lg" variant="secondary">
+              <Link href="/contact">
+                Entre em Contato
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+      </main>
       <Footer />
     </div>
   );

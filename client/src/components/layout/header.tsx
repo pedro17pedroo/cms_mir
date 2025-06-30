@@ -51,30 +51,87 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            {organizedMenuItems.map((item) => (
-              item.children && item.children.length > 0 ? (
-                <DropdownMenu key={item.id}>
-                  <DropdownMenuTrigger className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium flex items-center">
-                    {item.title} <ChevronDown className="ml-1 h-4 w-4" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {item.children.map((child) => (
-                      <DropdownMenuItem key={child.id}>
-                        <Link href={child.url}>{child.title}</Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Link
-                  key={item.id}
-                  href={item.url}
-                  className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
-                >
-                  {item.title}
-                </Link>
-              )
-            ))}
+            <Link
+              href="/"
+              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
+            >
+              Início
+            </Link>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium flex items-center">
+                Sobre <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>
+                  <Link href="/about">Nossa História</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/sobre/ministerio">Ministério</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/sobre/cremos">Cremos</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/sobre/presidente">Presidente</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Link
+              href="/services"
+              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
+            >
+              Cultos
+            </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium flex items-center">
+                Ensinos <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>
+                  <Link href="/teachings">Mensagens</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/ensino/audio">Áudio</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/ensino/video">Vídeo</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/plataforma-ensino">Plataforma</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Link
+              href="/events"
+              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
+            >
+              Eventos
+            </Link>
+
+            <Link
+              href="/blog"
+              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
+            >
+              Blog
+            </Link>
+
+            <Link
+              href="/donations"
+              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
+            >
+              Contribuições
+            </Link>
+
+            <Link
+              href="/contact"
+              className="text-[hsl(210,11%,15%)] hover:text-[hsl(43,96%,56%)] transition-colors font-medium"
+            >
+              Contato
+            </Link>
             
             <Link href="/admin">
               <Button variant="outline" size="sm">

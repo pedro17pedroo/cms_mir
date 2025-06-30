@@ -2,6 +2,7 @@ import { useState } from "react";
 import AdminSidebar from "@/components/admin/admin-sidebar";
 import QuickEditor from "@/components/admin/quick-editor";
 import EventManager from "@/components/admin/event-manager";
+import BlogManager from "@/components/admin/blog-manager";
 import TestimonialManager from "@/components/admin/testimonial-manager";
 import MessageManager from "@/components/admin/message-manager";
 import AnalyticsDashboard from "@/components/admin/analytics-dashboard";
@@ -42,6 +43,8 @@ export default function Admin() {
         return <HeaderCustomizer />;
       case "events":
         return <EventManager />;
+      case "blog":
+        return <BlogManager />;
       case "testimonials":
         return <TestimonialManager />;
       case "messages":

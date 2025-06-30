@@ -148,6 +148,15 @@ The application is configured for modern deployment platforms:
     - Implemented hierarchical navigation with expand/collapse functionality
   - All menu navigation now connects to functional pages with real content
 
+- June 30, 2025. Complete separation of Events and Blog systems:
+  - Created dedicated Events page (/events) with calendar functionality, registration links, and attendance tracking
+  - Created dedicated Blog page (/blog) with article management, featured posts, categories, and newsletter integration
+  - Implemented separate BlogManager in admin panel with comprehensive CRUD operations, filtering, and publishing controls
+  - Updated navigation header with separate menu items for Events and Blog
+  - Blog supports 10 predefined categories: Mensagem Pastoral, Ensino Bíblico, Reflexão Espiritual, etc.
+  - Events include detailed information: date/time, location, capacity, registration status
+  - Both systems now managed independently with distinct workflows as requested
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
