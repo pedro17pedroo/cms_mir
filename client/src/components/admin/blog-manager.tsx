@@ -18,6 +18,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertBlogPostSchema, type BlogPost, type InsertBlogPost } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import RichTextEditor from "@/components/ui/rich-text-editor";
+import BlogContentViewer from "@/components/blog/blog-content-viewer";
 
 const categories = [
   "Mensagem Pastoral",
@@ -399,9 +401,10 @@ export default function BlogManager() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <Tabs defaultValue="content" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="content">Conteúdo</TabsTrigger>
                   <TabsTrigger value="details">Detalhes</TabsTrigger>
+                  <TabsTrigger value="preview">Pré-visualização</TabsTrigger>
                   <TabsTrigger value="publish">Publicação</TabsTrigger>
                 </TabsList>
                 
@@ -459,10 +462,10 @@ export default function BlogManager() {
                       <FormItem>
                         <FormLabel>Conteúdo *</FormLabel>
                         <FormControl>
-                          <Textarea 
+                          <RichTextEditor
+                            content={field.value || ""}
+                            onChange={field.onChange}
                             placeholder="Escreva o conteúdo completo do artigo..."
-                            rows={12}
-                            {...field} 
                           />
                         </FormControl>
                         <FormMessage />
@@ -545,6 +548,77 @@ export default function BlogManager() {
                       </FormItem>
                     )}
                   />
+                </TabsContent>
+                
+                <TabsContent value="preview" className="space-y-4">
+                  <div className="border rounded-lg p-6 bg-white">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-900">Pré-visualização do Artigo</h3>
+                    
+                    {form.watch("title") && (
+                      <div className="mb-6">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                          {form.watch("title")}
+                        </h1>
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                          <span className="flex items-center gap-1">
+                            <User className="w-4 h-4" />
+                            {form.watch("author") || "Autor não informado"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {new Date().toLocaleDateString('pt-BR')}
+                          </span>
+                          {form.watch("category") && (
+                            <Badge variant="outline">{form.watch("category")}</Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {form.watch("excerpt") && (
+                      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                        <p className="text-gray-700 font-medium italic">
+                          {form.watch("excerpt")}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {form.watch("imageUrl") && (
+                      <div className="mb-6">
+                        <img 
+                          src={form.watch("imageUrl")} 
+                          alt={form.watch("title") || "Imagem do artigo"}
+                          className="w-full max-w-2xl mx-auto rounded-lg shadow-md"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    {form.watch("content") ? (
+                      <BlogContentViewer content={form.watch("content")} />
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                        <p>Adicione conteúdo para ver a pré-visualização</p>
+                      </div>
+                    )}
+                    
+                    {form.watch("tags") && form.watch("tags").length > 0 && (
+                      <div className="mt-6 pt-6 border-t">
+                        <h4 className="text-sm font-medium text-gray-900 mb-2">Tags:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {form.watch("tags").map((tag, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </TabsContent>
                 
                 <TabsContent value="publish" className="space-y-4">

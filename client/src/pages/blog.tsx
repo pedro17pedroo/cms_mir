@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, User, Calendar, ArrowRight, Eye, MessageCircle } from "lucide-react";
 import { Link } from "wouter";
 import type { BlogPost } from "@shared/schema";
+import BlogContentViewer from "@/components/blog/blog-content-viewer";
 
 export default function Blog() {
   const { data: blogPosts, isLoading } = useQuery<BlogPost[]>({
