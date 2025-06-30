@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AdminSidebar from "@/components/admin/admin-sidebar";
-import ContentEditor from "@/components/admin/content-editor";
+import QuickEditor from "@/components/admin/quick-editor";
 import EventManager from "@/components/admin/event-manager";
 import TestimonialManager from "@/components/admin/testimonial-manager";
 import MessageManager from "@/components/admin/message-manager";
@@ -15,6 +15,7 @@ import MenuManager from "@/components/admin/menu-manager";
 import LandingPageManager from "@/components/admin/landing-page-manager";
 import BlocksLibrary from "@/components/admin/blocks-library";
 import HeaderCustomizer from "@/components/admin/header-customizer";
+import SettingsPanel from "@/components/admin/settings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import MetaTags, { generatePageMeta } from "@/components/seo/meta-tags";
 
@@ -25,8 +26,8 @@ export default function Admin() {
     switch (activeTab) {
       case "dashboard":
         return <AnalyticsDashboard />;
-      case "content":
-        return <ContentEditor />;
+      case "quick-editor":
+        return <QuickEditor />;
       case "content-manager":
         return <ContentManager />;
       case "pages":
@@ -55,8 +56,10 @@ export default function Admin() {
         return <NewsletterManager />;
       case "donations":
         return <DonationManager />;
+      case "settings":
+        return <SettingsPanel />;
       default:
-        return <ContentEditor />;
+        return <AnalyticsDashboard />;
     }
   };
 

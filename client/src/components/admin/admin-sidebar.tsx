@@ -56,7 +56,8 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
   };
 
   const singleItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home }
+    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "quick-editor", label: "Editor Rápido", icon: FileText },
   ];
 
   const menuGroups: MenuGroup[] = [
@@ -65,7 +66,7 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
       label: "Gestão de Conteúdo",
       icon: FileText,
       items: [
-        { id: "content", label: "Editor de Conteúdo", icon: FileText },
+        { id: "content-manager", label: "Gestor de Conteúdo", icon: FileText },
         { id: "pages", label: "Páginas", icon: Globe },
         { id: "menus", label: "Menus", icon: Menu },
         { id: "messages", label: "Mensagens", icon: MessageSquare },
@@ -109,6 +110,10 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
         { id: "analytics", label: "Relatórios", icon: BarChart3 }
       ]
     }
+  ];
+
+  const bottomItems = [
+    { id: "settings", label: "Configurações", icon: Settings }
   ];
 
   return (

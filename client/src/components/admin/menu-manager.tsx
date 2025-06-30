@@ -235,14 +235,14 @@ export default function MenuManager({}: MenuManagerProps) {
                           <FormLabel>Menu Pai (para submenu)</FormLabel>
                           <FormControl>
                             <Select 
-                              onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
-                              value={field.value?.toString() || ""}
+                              onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
+                              value={field.value?.toString() || "none"}
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Selecione um menu pai (opcional)" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Nenhum (Menu principal)</SelectItem>
+                                <SelectItem value="none">Nenhum (Menu principal)</SelectItem>
                                 {parentMenuItems.map((item) => (
                                   <SelectItem key={item.id} value={item.id.toString()}>
                                     {item.title}
