@@ -39,15 +39,18 @@ function DynamicSectionRenderer({ section }: DynamicSectionRendererProps) {
       return <Testimonials />;
     
     case "bible_verse":
+    case "bible-verse":
       return <BibleVerse />;
     
     case "newsletter":
       return <Newsletter />;
     
     case "social_media":
+    case "social-media":
       return <SocialMedia />;
     
     case "live_streaming":
+    case "live-streaming":
       return <LiveStreaming />;
     
     case "events":
