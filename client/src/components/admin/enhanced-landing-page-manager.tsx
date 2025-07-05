@@ -240,12 +240,22 @@ export default function EnhancedLandingPageManager({}: EnhancedLandingPageManage
         method: "PATCH",
         body: JSON.stringify(data),
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/landing-page-sections"] });
-      setIsDialogOpen(false);
-      setEditingSection(null);
-      form.reset();
-      toast({ title: "Seção atualizada com sucesso!" });
+    onSuccess: (_, { id, data }) => {
+      // Atualização otimista - atualizar cache diretamente
+      queryClient.setQueryData<LandingPageSection[]>(["/api/landing-page-sections"], (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.map(section => 
+          section.id === id ? { ...section, ...data } : section
+        );
+      });
+      
+      // Só invalidar se estivermos editando via dialog
+      if (editingSection) {
+        setIsDialogOpen(false);
+        setEditingSection(null);
+        form.reset();
+        toast({ title: "Seção atualizada com sucesso!" });
+      }
     },
     onError: () => {
       toast({ title: "Erro ao atualizar seção", variant: "destructive" });
@@ -266,7 +276,7 @@ export default function EnhancedLandingPageManager({}: EnhancedLandingPageManage
   });
 
   // Reordenar seções com drag and drop
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
@@ -275,13 +285,24 @@ export default function EnhancedLandingPageManager({}: EnhancedLandingPageManage
 
       const newSections = arrayMove(sections, oldIndex, newIndex);
       
-      // Atualizar ordem no backend
-      newSections.forEach((section, index) => {
-        updateSectionMutation.mutate({
-          id: section.id,
-          data: { order: index + 1 }
-        });
-      });
+      // Otimização: atualizar apenas as seções afetadas sequencialmente
+      try {
+        for (let i = 0; i < newSections.length; i++) {
+          const section = newSections[i];
+          if (section.order !== i + 1) {
+            await updateSectionMutation.mutateAsync({
+              id: section.id,
+              data: { order: i + 1 }
+            });
+          }
+        }
+        
+        // Invalidar cache para garantir que mudanças se reflitam na página inicial
+        queryClient.invalidateQueries({ queryKey: ["/api/landing-page-sections"] });
+        toast({ title: "Ordem das seções atualizada!" });
+      } catch (error) {
+        toast({ title: "Erro ao reordenar seções", variant: "destructive" });
+      }
     }
   };
 
@@ -319,6 +340,11 @@ export default function EnhancedLandingPageManager({}: EnhancedLandingPageManage
       id: section.id,
       data: { isActive: !section.isActive }
     });
+    
+    // Invalidar cache após alteração de visibilidade para forçar atualização
+    setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ["/api/landing-page-sections"] });
+    }, 100);
   };
 
   const sectionTypes = [
