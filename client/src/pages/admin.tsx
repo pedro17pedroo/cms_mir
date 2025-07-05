@@ -14,7 +14,7 @@ import DonationManager from "@/components/admin/donation-manager";
 import PageManager from "@/components/admin/page-manager";
 import AdvancedPageManager from "@/components/admin/advanced-page-manager";
 import MenuManager from "@/components/admin/menu-manager";
-import LandingPageManager from "@/components/admin/landing-page-manager";
+import EnhancedLandingPageManager from "@/components/admin/enhanced-landing-page-manager";
 import BlocksLibrary from "@/components/admin/blocks-library";
 import HeaderCustomizer from "@/components/admin/header-customizer";
 import SettingsPanel from "@/components/admin/settings";
@@ -37,7 +37,7 @@ export default function Admin() {
       case "menus":
         return <MenuManager />;
       case "landing-page":
-        return <LandingPageManager />;
+        return <EnhancedLandingPageManager />;
       case "blocks":
         return <BlocksLibrary />;
       case "header":

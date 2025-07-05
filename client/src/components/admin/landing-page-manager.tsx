@@ -135,15 +135,18 @@ export default function LandingPageManager({}: LandingPageManagerProps) {
   };
 
   const sectionTypes = [
-    { value: "hero", label: "Hero/Banner" },
-    { value: "announcements", label: "Anúncios" },
-    { value: "events", label: "Próximos Eventos" },
-    { value: "sermons", label: "Mensagens Recentes" },
-    { value: "testimonials", label: "Testemunhos" },
+    { value: "hero", label: "Hero/Banner Principal" },
     { value: "about", label: "Sobre Nós" },
-    { value: "contact", label: "Contato" },
-    { value: "donations", label: "Doações" },
-    { value: "custom", label: "Personalizada" },
+    { value: "services", label: "Horários de Cultos" },
+    { value: "messages", label: "Mensagens Recentes" },
+    { value: "events", label: "Próximos Eventos" },
+    { value: "blog", label: "Últimas Publicações do Blog" },
+    { value: "testimonials", label: "Testemunhos" },
+    { value: "bible_verse", label: "Versículo do Dia" },
+    { value: "live_streaming", label: "Transmissão ao Vivo" },
+    { value: "social_media", label: "Redes Sociais" },
+    { value: "newsletter", label: "Newsletter" },
+    { value: "custom", label: "Seção Personalizada" },
   ];
 
   if (isLoading) {
