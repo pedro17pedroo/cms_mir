@@ -69,7 +69,6 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
       items: [
         { id: "content-manager", label: "Gestor de Conteúdo", icon: FileText },
         { id: "pages", label: "Páginas", icon: Globe },
-        { id: "menus", label: "Menus", icon: Menu },
         { id: "messages", label: "Mensagens", icon: MessageSquare },
         { id: "events", label: "Eventos", icon: Calendar },
         { id: "blog", label: "Blog", icon: BookOpen },
@@ -82,6 +81,7 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
       icon: Palette,
       items: [
         { id: "landing-page", label: "Landing Page", icon: Layout },
+        { id: "menus", label: "Menus", icon: Menu },
         { id: "blocks", label: "Biblioteca de Blocos", icon: Blocks },
         { id: "header", label: "Personalização Header", icon: Palette }
       ]
