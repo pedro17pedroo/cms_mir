@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPageSchema, type Page, type InsertPage } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import VisualPageBuilder from "@/components/page-builder/visual-page-builder";
 import { 
   Plus, 
   Edit, 
@@ -40,14 +41,13 @@ import { toast } from "@/hooks/use-toast";
 
 interface AdvancedPageManagerProps {}
 
-type ViewMode = 'list' | 'builder' | 'preview';
+type ViewMode = 'list' | 'builder';
 
 export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
-  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const queryClient = useQueryClient();
 
   const { data: pages = [], isLoading } = useQuery<Page[]>({
@@ -63,14 +63,13 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
       metaTitle: "",
       metaDescription: "",
       isPublished: false,
-      isTemplate: false,
       order: 0,
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertPage) => {
-      const response = await apiRequest("POST", "/api/pages", data);
+      const response = await apiRequest("/api/pages", { method: "POST", body: JSON.stringify(data) });
       return response.json();
     },
     onSuccess: () => {
@@ -93,7 +92,7 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertPage> }) => {
-      const response = await apiRequest("PUT", `/api/pages/${id}`, data);
+      const response = await apiRequest(`/api/pages/${id}`, { method: "PUT", body: JSON.stringify(data) });
       return response.json();
     },
     onSuccess: () => {
@@ -117,7 +116,7 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/pages/${id}`);
+      await apiRequest(`/api/pages/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pages"] });
@@ -145,7 +144,6 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
         metaTitle: page.metaTitle || "",
         metaDescription: page.metaDescription || "",
         isPublished: page.isPublished || false,
-        isTemplate: page.isTemplate || false,
         order: page.order || 0,
       });
     } else {
@@ -185,21 +183,6 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
     }
   };
 
-  const previewPage = () => {
-    setViewMode('preview');
-  };
-
-  const getDeviceStyles = () => {
-    switch (previewDevice) {
-      case 'mobile':
-        return { maxWidth: '375px', height: '667px' };
-      case 'tablet':
-        return { maxWidth: '768px', height: '1024px' };
-      default:
-        return { maxWidth: '100%', height: '100%' };
-    }
-  };
-
   if (viewMode === 'builder') {
     const selectedPage = pages.find(p => p.id.toString() === selectedPageId);
     if (!selectedPage) {
@@ -208,158 +191,21 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
     }
 
     return (
-      <div className="h-screen bg-gray-50">
-        <div className="bg-white border-b p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => setViewMode('list')}>
-                ← Voltar
-              </Button>
-              <h1 className="text-xl font-semibold">
-                Editando: {selectedPage.title}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={previewPage}>
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
-              </Button>
-              <Button onClick={() => savePageContent([])}>
-                <Save className="w-4 h-4 mr-2" />
-                Salvar
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Simplified Page Builder Interface */}
-        <div className="flex h-[calc(100vh-80px)]">
-          {/* Sidebar with widgets */}
-          <div className="w-80 bg-white border-r">
-            <div className="p-4">
-              <h3 className="font-semibold mb-4">Elementos</h3>
-              
-              <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="basic">Básicos</TabsTrigger>
-                  <TabsTrigger value="church">Igreja</TabsTrigger>
-                  <TabsTrigger value="advanced">Avançado</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="basic" className="space-y-2 mt-4">
-                  <WidgetButton icon={FileText} label="Título" />
-                  <WidgetButton icon={FileText} label="Texto" />
-                  <WidgetButton icon={Layout} label="Botão" />
-                  <WidgetButton icon={Layout} label="Imagem" />
-                  <WidgetButton icon={Layout} label="Vídeo" />
-                  <WidgetButton icon={Layout} label="Colunas" />
-                  <WidgetButton icon={Layout} label="Espaçador" />
-                </TabsContent>
-
-                <TabsContent value="church" className="space-y-2 mt-4">
-                  <WidgetButton icon={FileText} label="Horários Cultos" />
-                  <WidgetButton icon={FileText} label="Mensagem Pastor" />
-                  <WidgetButton icon={FileText} label="Lista Eventos" />
-                  <WidgetButton icon={FileText} label="Testemunhos" />
-                  <WidgetButton icon={FileText} label="Doações" />
-                  <WidgetButton icon={FileText} label="Versículo" />
-                  <WidgetButton icon={FileText} label="Transmissão" />
-                </TabsContent>
-
-                <TabsContent value="advanced" className="space-y-2 mt-4">
-                  <WidgetButton icon={Layout} label="Formulário" />
-                  <WidgetButton icon={Layout} label="Mapa" />
-                  <WidgetButton icon={Layout} label="Galeria" />
-                  <WidgetButton icon={Layout} label="Carousel" />
-                  <WidgetButton icon={Layout} label="Countdown" />
-                  <WidgetButton icon={Layout} label="Feed Social" />
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-
-          {/* Canvas area */}
-          <div className="flex-1 p-8 bg-gray-100">
-            <div className="max-w-4xl mx-auto bg-white min-h-[800px] shadow-lg rounded-lg">
-              <div className="p-8">
-                <div className="text-center py-16 text-gray-500">
-                  <Layout className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">Canvas de Construção</h3>
-                  <p>Arraste elementos da barra lateral para construir sua página</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Properties panel */}
-          <div className="w-80 bg-white border-l">
-            <div className="p-4">
-              <h3 className="font-semibold mb-4">Propriedades</h3>
-              <div className="text-center text-gray-500 py-8">
-                <Settings className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">Selecione um elemento para configurar</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <VisualPageBuilder
+        initialContent={selectedPage.content || ""}
+        onSave={(content) => {
+          updateMutation.mutate({ 
+            id: selectedPage.id, 
+            data: { content } 
+          });
+          setViewMode('list');
+        }}
+        onCancel={() => setViewMode('list')}
+      />
     );
   }
 
-  if (viewMode === 'preview') {
-    return (
-      <div className="h-screen bg-gray-100">
-        <div className="bg-white border-b p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => setViewMode('list')}>
-                ← Voltar
-              </Button>
-              <h1 className="text-xl font-semibold">Preview da Página</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={previewDevice === 'desktop' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPreviewDevice('desktop')}
-              >
-                <Monitor className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={previewDevice === 'tablet' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPreviewDevice('tablet')}
-              >
-                <Tablet className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={previewDevice === 'mobile' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPreviewDevice('mobile')}
-              >
-                <Smartphone className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
-        <div className="flex justify-center p-8">
-          <div 
-            className="bg-white shadow-lg border mx-auto transition-all duration-300"
-            style={getDeviceStyles()}
-          >
-            <div className="p-8 h-full overflow-auto">
-              <h1 className="text-3xl font-bold mb-6">Página de Exemplo</h1>
-              <p className="text-gray-600 mb-4">
-                Esta é uma pré-visualização da página. O conteúdo real será renderizado 
-                baseado nos elementos construídos no editor visual.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -488,21 +334,7 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="isTemplate"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <Switch 
-                            checked={field.value || false} 
-                            onCheckedChange={field.onChange} 
-                          />
-                        </FormControl>
-                        <FormLabel>Template</FormLabel>
-                      </FormItem>
-                    )}
-                  />
+
                 </div>
 
                 <div className="flex justify-end space-x-2">
@@ -563,9 +395,7 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
                         ) : (
                           <Badge variant="secondary">Rascunho</Badge>
                         )}
-                        {page.isTemplate && (
-                          <Badge variant="outline">Template</Badge>
-                        )}
+
                       </div>
                       <p className="text-sm text-gray-500">/{page.slug}</p>
                       {page.metaDescription && (
@@ -613,20 +443,3 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
   );
 }
 
-function WidgetButton({ icon: Icon, label }: { icon: any; label: string }) {
-  return (
-    <Button 
-      variant="outline" 
-      className="w-full justify-start h-auto p-3"
-      onClick={() => {
-        // Add widget to canvas logic here
-        console.log(`Adding ${label} widget`);
-      }}
-    >
-      <Icon className="w-5 h-5 mr-3" />
-      <div className="text-left">
-        <div className="font-medium">{label}</div>
-      </div>
-    </Button>
-  );
-}
