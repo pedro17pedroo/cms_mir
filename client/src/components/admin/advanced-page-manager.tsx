@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPageSchema, type Page, type InsertPage } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import VisualPageBuilder from "@/components/page-builder/visual-page-builder";
+import EnhancedVisualEditor from "@/components/page-builder/enhanced-visual-editor";
 import { 
   Plus, 
   Edit, 
@@ -191,7 +191,7 @@ export default function AdvancedPageManager({}: AdvancedPageManagerProps) {
     }
 
     return (
-      <VisualPageBuilder
+      <EnhancedVisualEditor
         initialContent={selectedPage.content || ""}
         onSave={(content) => {
           updateMutation.mutate({ 
