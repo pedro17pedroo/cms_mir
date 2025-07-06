@@ -1,17 +1,14 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import sharp from 'sharp';
 import { randomUUID } from 'crypto';
 import path from 'path';
 
-// AWS S3 Configuration
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-  },
+// Cloudinary Configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Multer configuration for handling file uploads
@@ -51,10 +48,10 @@ export interface ProcessedImage {
 }
 
 export class UploadService {
-  private bucketName: string;
+  private cloudName: string;
 
   constructor() {
-    this.bucketName = process.env.AWS_S3_BUCKET || 'church-cms-uploads';
+    this.cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'church-cms';
   }
 
   /**
@@ -62,44 +59,48 @@ export class UploadService {
    */
   isConfigured(): boolean {
     return !!(
-      process.env.AWS_ACCESS_KEY_ID &&
-      process.env.AWS_SECRET_ACCESS_KEY &&
-      process.env.AWS_S3_BUCKET &&
-      process.env.AWS_REGION
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
     );
   }
 
   /**
-   * Upload a file to S3
+   * Upload a file to Cloudinary
    */
   async uploadFile(
     file: Express.Multer.File,
     folder: string = 'uploads'
   ): Promise<UploadResult> {
     if (!this.isConfigured()) {
-      throw new Error('Upload service not configured. Please configure AWS credentials.');
+      throw new Error('Upload service not configured. Please configure Cloudinary credentials.');
     }
 
     try {
       const fileExtension = path.extname(file.originalname);
       const fileName = `${randomUUID()}${fileExtension}`;
-      const key = `${folder}/${fileName}`;
+      const public_id = `${folder}/${fileName}`;
 
-      const uploadParams = {
-        Bucket: this.bucketName,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-        ContentDisposition: 'inline',
-      };
-
-      await s3Client.send(new PutObjectCommand(uploadParams));
-
-      const url = `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            public_id,
+            folder: `church-cms/${folder}`,
+            resource_type: 'auto',
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        ).end(file.buffer);
+      });
 
       return {
-        url,
-        key,
+        url: (result as any).secure_url,
+        key: (result as any).public_id,
         filename: file.originalname,
         size: file.size,
         mimetype: file.mimetype,
@@ -111,14 +112,14 @@ export class UploadService {
   }
 
   /**
-   * Upload and process an image with multiple sizes
+   * Upload and process an image with multiple sizes using Cloudinary transformations
    */
   async uploadImage(
     file: Express.Multer.File,
     folder: string = 'images'
   ): Promise<ProcessedImage> {
     if (!this.isConfigured()) {
-      throw new Error('Upload service not configured. Please configure AWS credentials.');
+      throw new Error('Upload service not configured. Please configure Cloudinary credentials.');
     }
 
     if (!file.mimetype.startsWith('image/')) {
@@ -126,76 +127,71 @@ export class UploadService {
     }
 
     try {
-      const fileExtension = path.extname(file.originalname);
       const baseFileName = randomUUID();
+      const public_id = `church-cms/${folder}/${baseFileName}`;
 
-      // Process original image
-      const processedBuffer = await sharp(file.buffer)
-        .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 90 })
-        .toBuffer();
+      // Upload original image to Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            public_id,
+            folder: `church-cms/${folder}`,
+            resource_type: 'image',
+            transformation: [
+              { width: 1920, height: 1080, crop: 'limit', quality: 'auto:good' }
+            ]
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        ).end(file.buffer);
+      });
 
-      // Upload original
-      const originalKey = `${folder}/${baseFileName}_original.jpg`;
-      await s3Client.send(new PutObjectCommand({
-        Bucket: this.bucketName,
-        Key: originalKey,
-        Body: processedBuffer,
-        ContentType: 'image/jpeg',
-        ContentDisposition: 'inline',
-      }));
+      const cloudinaryResult = result as any;
 
       const original: UploadResult = {
-        url: `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${originalKey}`,
-        key: originalKey,
+        url: cloudinaryResult.secure_url,
+        key: cloudinaryResult.public_id,
         filename: file.originalname,
-        size: processedBuffer.length,
+        size: cloudinaryResult.bytes,
         mimetype: 'image/jpeg',
       };
 
-      // Create thumbnail (300x200)
-      const thumbnailBuffer = await sharp(file.buffer)
-        .resize(300, 200, { fit: 'cover' })
-        .jpeg({ quality: 80 })
-        .toBuffer();
-
-      const thumbnailKey = `${folder}/${baseFileName}_thumb.jpg`;
-      await s3Client.send(new PutObjectCommand({
-        Bucket: this.bucketName,
-        Key: thumbnailKey,
-        Body: thumbnailBuffer,
-        ContentType: 'image/jpeg',
-        ContentDisposition: 'inline',
-      }));
+      // Generate thumbnail URL with Cloudinary transformations
+      const thumbnailUrl = cloudinary.url(cloudinaryResult.public_id, {
+        width: 300,
+        height: 200,
+        crop: 'fill',
+        quality: 'auto:good',
+        format: 'jpg'
+      });
 
       const thumbnail: UploadResult = {
-        url: `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${thumbnailKey}`,
-        key: thumbnailKey,
+        url: thumbnailUrl,
+        key: `${cloudinaryResult.public_id}_thumb`,
         filename: `thumb_${file.originalname}`,
-        size: thumbnailBuffer.length,
+        size: cloudinaryResult.bytes,
         mimetype: 'image/jpeg',
       };
 
-      // Create medium size (800x600)
-      const mediumBuffer = await sharp(file.buffer)
-        .resize(800, 600, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 85 })
-        .toBuffer();
-
-      const mediumKey = `${folder}/${baseFileName}_medium.jpg`;
-      await s3Client.send(new PutObjectCommand({
-        Bucket: this.bucketName,
-        Key: mediumKey,
-        Body: mediumBuffer,
-        ContentType: 'image/jpeg',
-        ContentDisposition: 'inline',
-      }));
+      // Generate medium URL with Cloudinary transformations
+      const mediumUrl = cloudinary.url(cloudinaryResult.public_id, {
+        width: 800,
+        height: 600,
+        crop: 'limit',
+        quality: 'auto:good',
+        format: 'jpg'
+      });
 
       const medium: UploadResult = {
-        url: `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${mediumKey}`,
-        key: mediumKey,
+        url: mediumUrl,
+        key: `${cloudinaryResult.public_id}_medium`,
         filename: `medium_${file.originalname}`,
-        size: mediumBuffer.length,
+        size: cloudinaryResult.bytes,
         mimetype: 'image/jpeg',
       };
 
@@ -211,7 +207,7 @@ export class UploadService {
   }
 
   /**
-   * Delete a file from S3
+   * Delete a file from Cloudinary
    */
   async deleteFile(key: string): Promise<void> {
     if (!this.isConfigured()) {
@@ -219,10 +215,7 @@ export class UploadService {
     }
 
     try {
-      await s3Client.send(new DeleteObjectCommand({
-        Bucket: this.bucketName,
-        Key: key,
-      }));
+      await cloudinary.uploader.destroy(key);
     } catch (error) {
       console.error('Delete error:', error);
       throw new Error('Failed to delete file');
@@ -230,20 +223,22 @@ export class UploadService {
   }
 
   /**
-   * Generate a presigned URL for secure file access
+   * Generate a signed URL for secure file access (Cloudinary)
    */
-  async getPresignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
+  async getPresignedUrl(public_id: string, expiresIn: number = 3600): Promise<string> {
     if (!this.isConfigured()) {
       throw new Error('Upload service not configured');
     }
 
     try {
-      const command = new GetObjectCommand({
-        Bucket: this.bucketName,
-        Key: key,
+      // Generate a signed URL that expires after specified time
+      const timestamp = Math.round(new Date().getTime() / 1000) + expiresIn;
+      
+      return cloudinary.url(public_id, {
+        sign_url: true,
+        type: 'authenticated',
+        resource_type: 'auto'
       });
-
-      return await getSignedUrl(s3Client, command, { expiresIn });
     } catch (error) {
       console.error('Presigned URL error:', error);
       throw new Error('Failed to generate presigned URL');
@@ -258,8 +253,8 @@ export class UploadService {
       isConfigured: this.isConfigured(),
       maxFileSize: 10 * 1024 * 1024, // 10MB
       allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'application/pdf'],
-      bucketName: this.bucketName,
-      region: process.env.AWS_REGION || 'us-east-1',
+      cloudName: this.cloudName,
+      provider: 'cloudinary',
     };
   }
 

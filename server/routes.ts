@@ -602,8 +602,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(videos);
   });
 
+  app.get("/api/videos/youtube-channel", async (req, res) => {
+    try {
+      const apiKey = process.env.YOUTUBE_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "YouTube API key not configured" });
+      }
+
+      const channelId = req.query.channelId as string || 'UC_x5XG1OV2P6uZZ5FSM9Ttw';
+      const maxResults = req.query.maxResults as string || '10';
+      
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${apiKey}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`YouTube API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('YouTube API error:', error);
+      res.status(500).json({ error: "Failed to fetch YouTube videos" });
+    }
+  });
+
   app.get("/api/videos/:id", async (req, res) => {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: "Invalid video ID" });
+    }
     const video = await storage.getVideo(id);
     if (!video) {
       return res.status(404).json({ error: "Video not found" });
