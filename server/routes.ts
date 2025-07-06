@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { paymentService } from "./services/payment-simple";
+import { uploadService, upload } from "./services/upload";
 import { 
   insertHeroSlideSchema,
   insertAboutContentSchema,
@@ -410,6 +412,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedDonation);
     } catch (error) {
       res.status(400).json({ error: "Invalid status data" });
+    }
+  });
+
+  // Payment processing routes
+  app.post("/api/payments/create-intent", async (req, res) => {
+    try {
+      const { amount, currency, donorName, donorEmail, campaignId, message } = req.body;
+      
+      if (!amount || !donorName || !donorEmail) {
+        return res.status(400).json({ error: "Amount, donor name, and email are required" });
+      }
+
+      const paymentIntent = await paymentService.createPaymentIntent({
+        amount: parseFloat(amount),
+        currency: currency || 'eur',
+        donorName,
+        donorEmail,
+        campaignId: campaignId ? parseInt(campaignId) : undefined,
+        message,
+      });
+
+      res.json(paymentIntent);
+    } catch (error) {
+      console.error('Payment intent creation error:', error);
+      res.status(500).json({ error: "Failed to create payment intent" });
+    }
+  });
+
+  app.get("/api/payments/config", async (req, res) => {
+    try {
+      res.json({
+        publishableKey: paymentService.getPublishableKey(),
+        isConfigured: paymentService.isConfigured(),
+      });
+    } catch (error) {
+      console.error('Payment config error:', error);
+      res.status(500).json({ error: "Failed to get payment configuration" });
+    }
+  });
+
+  app.post("/api/payments/confirm", async (req, res) => {
+    try {
+      const { paymentIntentId } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({ error: "Payment intent ID is required" });
+      }
+
+      await paymentService.confirmPayment(paymentIntentId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Payment confirmation error:', error);
+      res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
+
+  app.post("/api/payments/webhook", async (req, res) => {
+    const signature = req.headers['stripe-signature'] as string;
+    
+    try {
+      await paymentService.handleWebhook(req.body, signature);
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook error:', error);
+      res.status(400).send(`Webhook Error: ${error}`);
+    }
+  });
+
+  // File upload routes
+  app.get("/api/upload/config", async (req, res) => {
+    try {
+      const config = uploadService.getUploadConfig();
+      res.json(config);
+    } catch (error) {
+      console.error('Upload config error:', error);
+      res.status(500).json({ error: "Failed to get upload configuration" });
+    }
+  });
+
+  app.post("/api/upload/file", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file provided" });
+      }
+
+      const folder = req.body.folder || 'uploads';
+      
+      // Use cloud storage if configured, otherwise fallback to local
+      const result = uploadService.isConfigured() 
+        ? await uploadService.uploadFile(req.file, folder)
+        : await uploadService.saveToLocal(req.file, folder);
+
+      res.json(result);
+    } catch (error) {
+      console.error('File upload error:', error);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to upload file" });
+    }
+  });
+
+  app.post("/api/upload/image", upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No image provided" });
+      }
+
+      const folder = req.body.folder || 'images';
+      
+      if (uploadService.isConfigured()) {
+        const result = await uploadService.uploadImage(req.file, folder);
+        res.json(result);
+      } else {
+        // Fallback to simple local upload for demo
+        const result = await uploadService.saveToLocal(req.file, folder);
+        res.json({ original: result });
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to upload image" });
+    }
+  });
+
+  app.delete("/api/upload/:key", async (req, res) => {
+    try {
+      const { key } = req.params;
+      const decodedKey = decodeURIComponent(key);
+      
+      if (uploadService.isConfigured()) {
+        await uploadService.deleteFile(decodedKey);
+      } else {
+        // For local files, attempt to delete from public folder
+        const fs = await import('fs/promises');
+        try {
+          await fs.unlink(`./public/${decodedKey}`);
+        } catch (error) {
+          console.warn('Local file deletion failed:', error);
+        }
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('File deletion error:', error);
+      res.status(500).json({ error: "Failed to delete file" });
     }
   });
 
