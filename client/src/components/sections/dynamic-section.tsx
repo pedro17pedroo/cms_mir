@@ -19,7 +19,13 @@ interface DynamicSectionRendererProps {
 function DynamicSectionRenderer({ section }: DynamicSectionRendererProps) {
   if (!section.isActive) return null;
 
-  const config = JSON.parse(section.content);
+  let config;
+  try {
+    config = JSON.parse(section.content);
+  } catch (error) {
+    console.error("Error parsing section content:", error, "Content:", section.content);
+    config = {};
+  }
 
   switch (section.sectionType) {
     case "hero":
