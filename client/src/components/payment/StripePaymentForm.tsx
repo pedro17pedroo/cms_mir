@@ -72,20 +72,19 @@ function PaymentForm({ amount, currency = 'brl', campaignId, onSuccess, onCancel
 
     try {
       // Create payment intent
-      const response = await apiRequest(
-        '/api/payments/create-intent',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            amount: amount * 100, // Convert to cents
-            currency,
+      const response = await apiRequest('/api/payments/create-payment-intent', {
+        method: 'POST',
+        body: JSON.stringify({
+          amount,
+          currency,
+          metadata: {
+            campaignId: campaignId?.toString(),
             donorName: donorInfo.name,
             donorEmail: donorInfo.email,
-            campaignId,
             message: donorInfo.message,
-          }),
-        }
-      );
+          },
+        }),
+      });
       
       const intentResponse = await response.json();
 
@@ -241,7 +240,7 @@ export function StripePaymentForm(props: PaymentFormProps) {
 
   // Load Stripe configuration
   useEffect(() => {
-    apiRequest('/api/payments/config')
+    apiRequest('/api/payments/config', { method: 'GET' })
       .then(async (response) => {
         const config = await response.json();
         setIsConfigured(config.isConfigured);

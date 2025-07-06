@@ -972,6 +972,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment routes (Stripe)
+  app.get("/api/payments/config", async (req, res) => {
+    const publishableKey = process.env.STRIPE_PUBLISHABLE_KEY || '';
+    const isConfigured = !!(publishableKey && process.env.STRIPE_SECRET_KEY);
+    
+    res.json({
+      publishableKey: isConfigured ? publishableKey : '',
+      isConfigured,
+    });
+  });
+
+  app.post("/api/payments/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, currency, metadata } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ error: "Invalid amount" });
+      }
+
+      const { createPaymentIntent } = await import('./stripe');
+      const result = await createPaymentIntent(amount, currency || 'brl', metadata);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Payment intent error:', error);
+      res.status(400).json({ error: "Failed to create payment intent" });
+    }
+  });
+
+  app.post("/api/payments/create-checkout-session", async (req, res) => {
+    try {
+      const { amount, campaignTitle, campaignId } = req.body;
+      
+      if (!amount || amount <= 0 || !campaignTitle || !campaignId) {
+        return res.status(400).json({ error: "Invalid request data" });
+      }
+
+      const { createCheckoutSession } = await import('./stripe');
+      
+      const protocol = req.get('x-forwarded-proto') || req.protocol;
+      const host = req.get('host');
+      const baseUrl = `${protocol}://${host}`;
+      
+      const session = await createCheckoutSession(
+        amount,
+        campaignTitle,
+        campaignId,
+        `${baseUrl}/donation-success?session_id={CHECKOUT_SESSION_ID}`,
+        `${baseUrl}/donate`
+      );
+      
+      res.json({ sessionId: session.id, url: session.url });
+    } catch (error) {
+      console.error('Checkout session error:', error);
+      res.status(400).json({ error: "Failed to create checkout session" });
+    }
+  });
+
+  app.post("/api/payments/webhook", async (req, res) => {
+    try {
+      const signature = req.headers['stripe-signature'] as string;
+      
+      if (!signature) {
+        return res.status(400).json({ error: "No signature provided" });
+      }
+
+      const { handleWebhook } = await import('./stripe');
+      const event = await handleWebhook(req.body, signature);
+      
+      // Handle different event types
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object as any;
+          const campaignId = paymentIntent.metadata?.campaignId;
+          const amount = paymentIntent.amount / 100; // Convert from cents
+          
+          if (campaignId) {
+            // Update campaign raised amount
+            await storage.updateCampaignRaised(parseInt(campaignId), amount);
+            
+            // Create donation record
+            await storage.createDonation({
+              campaignId: parseInt(campaignId),
+              donorName: paymentIntent.metadata?.donorName || 'Anônimo',
+              donorEmail: paymentIntent.metadata?.donorEmail || '',
+              amount: amount.toString(),
+              message: paymentIntent.metadata?.message || '',
+              isAnonymous: paymentIntent.metadata?.isAnonymous === 'true',
+              paymentStatus: 'completed',
+              stripePaymentId: paymentIntent.id,
+              type: 'one-time',
+              status: 'completed',
+              paymentMethod: 'stripe',
+            });
+          }
+          break;
+          
+        case 'checkout.session.completed':
+          const session = event.data.object as any;
+          const sessionCampaignId = session.metadata?.campaignId;
+          
+          if (sessionCampaignId) {
+            // Session completed - payment should be processed
+            console.log('Checkout session completed for campaign:', sessionCampaignId);
+          }
+          break;
+      }
+      
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook error:', error);
+      res.status(400).json({ error: "Webhook processing failed" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

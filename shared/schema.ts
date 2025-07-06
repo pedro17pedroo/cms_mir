@@ -117,6 +117,10 @@ export const donations = pgTable("donations", {
   transactionId: text("transaction_id"),
   paymentMethod: text("payment_method"), // "stripe", "paypal"
   notes: text("notes"),
+  message: text("message"), // Additional donation message
+  isAnonymous: boolean("is_anonymous").default(false),
+  paymentStatus: text("payment_status").default("pending"), // For Stripe payments
+  stripePaymentId: text("stripe_payment_id"), // Stripe payment intent ID
   createdAt: timestamp("created_at").defaultNow(),
 });
 
