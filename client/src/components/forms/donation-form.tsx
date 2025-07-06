@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Heart, CreditCard, Info } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 
 interface DonationCampaign {
   id: number;
@@ -31,6 +32,7 @@ export default function DonationForm() {
   const [selectedCampaign, setSelectedCampaign] = useState<string>('');
   const [message, setMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -44,44 +46,13 @@ export default function DonationForm() {
     queryKey: ['/api/payments/config'],
   });
 
-  // Create payment intent mutation
-  const createPaymentMutation = useMutation({
-    mutationFn: async (donationData: any) => {
-      const response = await fetch('/api/payments/create-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(donationData),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to process payment');
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Payment Intent Created",
-        description: "Payment processing will be available when Stripe is configured.",
-      });
-      // Here you would typically handle the Stripe client-side payment
-      console.log('Payment Intent:', data);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Payment Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleContinueToPayment = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!amount || !donorName || !donorEmail) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Informações Incompletas",
+        description: "Por favor, preencha todos os campos obrigatórios.",
         variant: "destructive",
       });
       return;
@@ -89,56 +60,63 @@ export default function DonationForm() {
 
     if (parseFloat(amount) <= 0) {
       toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid donation amount.",
+        title: "Valor Inválido",
+        description: "Por favor, insira um valor de doação válido.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsProcessing(true);
+    setShowPaymentForm(true);
+  };
 
-    try {
-      await createPaymentMutation.mutateAsync({
-        amount: parseFloat(amount),
-        currency: 'eur',
-        donorName,
-        donorEmail,
-        campaignId: selectedCampaign ? parseInt(selectedCampaign) : undefined,
-        message,
-      });
+  const handlePaymentSuccess = (donation: any) => {
+    toast({
+      title: "Doação Confirmada!",
+      description: `Obrigado pela sua doação de R$ ${amount}. Deus abençoe!`,
+    });
 
-      // Reset form on success
-      setAmount('');
-      setDonorName('');
-      setDonorEmail('');
-      setMessage('');
-      setSelectedCampaign('');
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/donation-campaigns'] });
-    } catch (error) {
-      console.error('Donation error:', error);
-    } finally {
-      setIsProcessing(false);
-    }
+    // Reset form
+    setAmount('');
+    setDonorName('');
+    setDonorEmail('');
+    setMessage('');
+    setSelectedCampaign('');
+    setShowPaymentForm(false);
+    
+    queryClient.invalidateQueries({ queryKey: ['/api/donation-campaigns'] });
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPaymentForm(false);
   };
 
   const predefinedAmounts = [25, 50, 100, 250, 500];
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <Card>
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <Heart className="h-8 w-8 text-red-500 mr-2" />
-            <CardTitle className="text-3xl font-bold text-purple-800">Faça sua Doação</CardTitle>
-          </div>
-          <CardDescription className="text-lg">
-            Sua generosidade faz a diferença na nossa missão de servir e abençoar vidas.
-          </CardDescription>
-        </CardHeader>
+      {/* Show payment form when ready to pay */}
+      {showPaymentForm ? (
+        <StripePaymentForm
+          amount={parseFloat(amount)}
+          currency="brl"
+          campaignId={selectedCampaign ? parseInt(selectedCampaign) : undefined}
+          onSuccess={handlePaymentSuccess}
+          onCancel={handlePaymentCancel}
+        />
+      ) : (
+        <Card>
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <Heart className="h-8 w-8 text-red-500 mr-2" />
+              <CardTitle className="text-3xl font-bold text-purple-800">Faça sua Doação</CardTitle>
+            </div>
+            <CardDescription className="text-lg">
+              Sua generosidade faz a diferença na nossa missão de servir e abençoar vidas.
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent className="space-y-6">
+          <CardContent className="space-y-6">
           {/* Payment Configuration Alert */}
           {!paymentConfig?.isConfigured && (
             <Alert>
@@ -150,7 +128,7 @@ export default function DonationForm() {
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleContinueToPayment} className="space-y-6">
             {/* Campaign Selection */}
             {campaigns.length > 0 && (
               <div className="space-y-2">
@@ -275,7 +253,8 @@ export default function DonationForm() {
             </div>
           </form>
         </CardContent>
-      </Card>
+        </Card>
+      )}
 
       {/* Campaign Progress Cards */}
       {campaigns.length > 0 && (
