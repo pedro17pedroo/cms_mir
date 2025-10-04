@@ -23,6 +23,7 @@ import SobrePresidente from "@/pages/sobre/presidente";
 import EnsinoAudio from "@/pages/ensino/audio";
 import EnsinoVideo from "@/pages/ensino/video";
 import PlataformaEnsino from "@/pages/plataforma-ensino/index";
+import EventosBlogs from "@/pages/eventos-blogs";
 
 
 // Temporary placeholder for remaining pages
@@ -69,6 +70,7 @@ function Router() {
       
       <Route path="/events" component={Events} />
       <Route path="/blog" component={Blog} />
+      <Route path="/eventos-blogs" component={EventosBlogs} />
       <Route path="/videos" component={Videos} />
       <Route path="/doacoes" component={Donations} />
       <Route path="/contato" component={Contact} />
