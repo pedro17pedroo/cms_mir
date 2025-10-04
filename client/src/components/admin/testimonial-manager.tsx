@@ -28,7 +28,10 @@ export default function TestimonialManager() {
 
   const createTestimonialMutation = useMutation({
     mutationFn: async (data: any) => {
-      await apiRequest("POST", "/api/testimonials", data);
+      await apiRequest("/api/testimonials", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/testimonials"] });
@@ -49,7 +52,10 @@ export default function TestimonialManager() {
 
   const updateTestimonialMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      await apiRequest("PUT", `/api/testimonials/${id}`, data);
+      await apiRequest(`/api/testimonials/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/testimonials"] });
@@ -70,7 +76,9 @@ export default function TestimonialManager() {
 
   const deleteTestimonialMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/testimonials/${id}`);
+      await apiRequest(`/api/testimonials/${id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/testimonials"] });

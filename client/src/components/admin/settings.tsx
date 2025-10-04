@@ -69,7 +69,10 @@ export default function SettingsPanel() {
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: Record<string, string>) => {
       const promises = Object.entries(settings).map(([key, value]) =>
-        apiRequest("PUT", `/api/site-settings/${key}`, { value })
+        apiRequest(`/api/site-settings/${key}`, {
+          method: "PATCH",
+          body: JSON.stringify({ value })
+        })
       );
       await Promise.all(promises);
     },

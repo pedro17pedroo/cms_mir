@@ -65,7 +65,10 @@ export default function QuickEditor() {
 
   const updateBibleVerseMutation = useMutation({
     mutationFn: async (data: any) => {
-      await apiRequest("PUT", "/api/bible-verse", data);
+      await apiRequest("/api/bible-verse", {
+        method: "PATCH",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/bible-verse"] });
@@ -87,7 +90,10 @@ export default function QuickEditor() {
   const updateMessageMutation = useMutation({
     mutationFn: async (data: any) => {
       if (featuredMessage) {
-        await apiRequest("PUT", `/api/messages/${featuredMessage.id}`, data);
+        await apiRequest(`/api/messages/${featuredMessage.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(data)
+        });
       }
     },
     onSuccess: () => {

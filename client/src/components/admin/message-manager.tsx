@@ -32,7 +32,10 @@ export default function MessageManager() {
 
   const createMessageMutation = useMutation({
     mutationFn: async (data: any) => {
-      await apiRequest("POST", "/api/messages", data);
+      await apiRequest("/api/messages", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
@@ -54,7 +57,10 @@ export default function MessageManager() {
 
   const updateMessageMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      await apiRequest("PUT", `/api/messages/${id}`, data);
+      await apiRequest(`/api/messages/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
@@ -76,7 +82,9 @@ export default function MessageManager() {
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/messages/${id}`);
+      await apiRequest(`/api/messages/${id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
