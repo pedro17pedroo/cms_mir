@@ -5,9 +5,11 @@ import * as schema from "@shared/schema";
 
 class CustomWebSocket extends ws {
   constructor(address: string, protocols?: string | string[]) {
-    super(address, protocols, {
-      rejectUnauthorized: false
-    });
+    const options: any = {};
+    if (process.env.NODE_ENV !== 'production') {
+      options.rejectUnauthorized = false;
+    }
+    super(address, protocols, options);
   }
 }
 
