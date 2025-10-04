@@ -26,6 +26,33 @@ The application is built with a full-stack architecture:
 -   **Database Schema**: Comprises 22 tables to manage entities such as pages, menu items, landing page sections, content blocks, header/footer configurations, and more.
 -   **Visual Editor**: Advanced drag-and-drop visual editor with widget categories, a professional color picker, rich text editing, page templates, responsive device previews, and advanced styling controls.
 
+## Replit Environment Setup
+
+This project is configured to run in Replit with the following setup:
+
+-   **Database**: PostgreSQL database provisioned via Replit (DATABASE_URL environment variable)
+-   **Port Configuration**: Server runs on port 5000 (both frontend and backend on same port)
+-   **Development Server**: Vite dev server with HMR configured for Replit proxy (`allowedHosts: true`)
+-   **Deployment**: Configured for autoscale deployment with build and start scripts
+-   **Workflow**: "Start application" runs `npm run dev` on port 5000
+
+### Initial Setup Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Push database schema
+npm run db:push
+
+# Seed database with initial data
+npx tsx scripts/seed.ts
+```
+
+### Admin Access
+- **Username**: admin
+- **Password**: admin123
+
 ## External Dependencies
 
 -   **@neondatabase/serverless**: Serverless PostgreSQL database connection.
