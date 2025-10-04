@@ -39,7 +39,8 @@ export default function DonationManager() {
   });
 
   const createCampaignMutation = useMutation({
-    mutationFn: (campaign: any) => apiRequest("/api/donation-campaigns", "POST", campaign),
+    mutationFn: (campaign: any) => 
+      apiRequest("/api/donation-campaigns", { method: "POST", body: JSON.stringify(campaign) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/donation-campaigns"] });
       toast({ title: "Campanha criada com sucesso!" });
@@ -57,7 +58,7 @@ export default function DonationManager() {
 
   const updateDonationStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => 
-      apiRequest(`/api/donations/${id}/status`, "PUT", { status }),
+      apiRequest(`/api/donations/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/donations"] });
       toast({ title: "Status atualizado com sucesso!" });

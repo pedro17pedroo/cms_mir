@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/events/:id", async (req, res) => {
+  app.patch("/api/events/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const event = insertEventSchema.partial().parse(req.body);
@@ -350,7 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/blog-posts/:id", async (req, res) => {
+  app.patch("/api/blog-posts/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const post = insertBlogPostSchema.partial().parse(req.body);

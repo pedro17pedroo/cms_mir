@@ -31,7 +31,7 @@ export default function NewsletterManager() {
 
   const sendNewsletterMutation = useMutation({
     mutationFn: (newsletter: typeof newNewsletter) => 
-      apiRequest("/api/newsletter/send", "POST", newsletter),
+      apiRequest("/api/newsletter/send", { method: "POST", body: JSON.stringify(newsletter) }),
     onSuccess: () => {
       toast({ title: "Newsletter enviada com sucesso!" });
       setIsComposeDialogOpen(false);
@@ -48,7 +48,7 @@ export default function NewsletterManager() {
 
   const unsubscribeMutation = useMutation({
     mutationFn: (email: string) => 
-      apiRequest("/api/newsletter-unsubscribe", "POST", { email }),
+      apiRequest("/api/newsletter-unsubscribe", { method: "POST", body: JSON.stringify({ email }) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/newsletter-subscribers"] });
       toast({ title: "Assinante removido com sucesso!" });

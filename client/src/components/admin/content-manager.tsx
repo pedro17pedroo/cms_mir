@@ -114,8 +114,10 @@ export default function ContentManager() {
         about: `/api/about-content/${item.id}`
       }[item.type];
 
+      const method = (item.type === 'blog' || item.type === 'event') ? 'PATCH' : 'PUT';
+      
       const response = await fetch(endpoint, {
-        method: 'PUT',
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
