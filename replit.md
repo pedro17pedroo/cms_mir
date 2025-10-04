@@ -2,235 +2,39 @@
 
 ## Overview
 
-This is a comprehensive Church Content Management System (CMS) built with modern web technologies. The application is designed to manage all website content, sessions, and integrations for a church website. It features a public-facing frontend for visitors and a full-featured admin panel for content management.
-
-## System Architecture
-
-The application follows a full-stack architecture with:
-
-- **Frontend**: React 18 with TypeScript, built using Vite
-- **Backend**: Express.js server with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **UI Framework**: shadcn/ui components with Tailwind CSS
-- **State Management**: TanStack Query for server state management
-- **Routing**: Wouter for client-side routing
-
-## Key Components
-
-### Frontend Architecture
-- **Component Structure**: Modular React components organized by functionality
-- **Styling**: Tailwind CSS with custom church theme colors (gold, purple, orange)
-- **UI Components**: shadcn/ui component library for consistent design
-- **Forms**: React Hook Form with Zod validation
-- **Animations**: Framer Motion for smooth transitions
-- **Responsive Design**: Mobile-first approach with breakpoint-based layouts
-
-### Backend Architecture
-- **API Structure**: RESTful endpoints organized by resource type
-- **Database Layer**: Drizzle ORM with PostgreSQL for data persistence
-- **Type Safety**: Shared TypeScript schemas between frontend and backend
-- **Error Handling**: Centralized error handling middleware
-- **Development**: Hot reload with Vite integration
-
-### Database Schema
-The application manages several core entities:
-- **Users**: Admin authentication and user management
-- **Hero Slides**: Homepage carousel content
-- **About Content**: Church vision, mission, and beliefs
-- **Service Schedules**: Worship service times and details
-- **Messages**: Sermons and teachings with featured content
-- **Testimonials**: Member testimonies and experiences
-- **Bible Verse**: Daily/featured scripture content
-- **Site Settings**: Global website configuration
-
-## Data Flow
-
-1. **Public Pages**: Static content served with dynamic data fetched from API endpoints
-2. **Admin Interface**: CRUD operations for all content types through protected admin routes
-3. **Real-time Updates**: TanStack Query provides optimistic updates and cache invalidation
-4. **Form Handling**: Validated submissions with immediate feedback and error handling
-
-## External Dependencies
-
-- **@neondatabase/serverless**: Serverless PostgreSQL database connection
-- **Drizzle ORM**: Type-safe database operations and migrations
-- **TanStack Query**: Server state management and caching
-- **shadcn/ui**: Pre-built accessible UI components
-- **Framer Motion**: Animation library for enhanced user experience
-- **React Hook Form**: Form state management and validation
-- **Zod**: Runtime type validation and schema parsing
-
-## Deployment Strategy
-
-The application is configured for modern deployment platforms:
-
-- **Build Process**: Vite handles frontend bundling, esbuild compiles the server
-- **Environment**: Environment variables for database configuration
-- **Database**: Drizzle migrations for schema management
-- **Development**: Integrated development server with hot reload
-- **Production**: Static asset serving with Express.js API routes
-
-## Changelog
-- June 28, 2025. Initial setup
-- June 28, 2025. Implemented complete PRD requirements:
-  - Added newsletter subscription system with email collection
-  - Integrated social media components (Facebook, Instagram, YouTube, WhatsApp)
-  - Created event registration system with RSVP functionality
-  - Added authentication system for admin access
-  - Implemented comprehensive routing for all pages
-  - Enhanced event management with calendar functionality
-  - Added social media sharing capabilities
-  - Created responsive design with church theme colors (purple, gold, orange)
-  - Migrated from memory storage to PostgreSQL database
-  - Implemented live streaming component with YouTube integration
-  - Added SEO optimization with meta tags and structured data
-  - Created blog commenting system with moderation
-  - Enhanced admin panel with advanced content management dashboard
-  - Added comprehensive analytics dashboard with real-time metrics
-  - Implemented advanced live streaming with interactive chat
-  - Created unified content manager for all website sections
-  - Added real-time data updates and caching throughout the system
-- June 28, 2025. Completed PRD implementation and migration:
-  - Created all missing pages: About, Services, Teachings, Contact
-  - Implemented complete admin panel with specialized managers:
-    - Social Media Manager (Facebook, Instagram, YouTube, WhatsApp integration)
-    - Streaming Manager (Live streaming control, scheduling, analytics)
-    - Newsletter Manager (Email campaigns, subscriber management, analytics)
-    - Donation Manager (Campaign creation, donation tracking, financial analytics)
-  - Added real-time analytics dashboard with authentic data integration
-  - Enhanced all admin components with comprehensive CRUD operations
-  - Integrated contact form with backend processing
-  - Updated navigation and routing for all new pages
-  - All PRD requirements successfully implemented and functional
-- June 28, 2025. Implemented updated PRD advanced requirements:
-  - Dynamic Page Management: Created complete page editor with visual builder
-  - Dynamic Menu System: Full menu creation, editing, activation/deactivation with submenu support
-  - Landing Page Manager: Drag-and-drop section ordering with configurable content blocks
-  - Content Blocks Library: Reusable component system with thumbnails and customization
-  - Header Customizer: Real-time header configuration with logo, colors, and layout options
-  - Footer Configuration: Editable footer sections and contact information
-  - Added 6 new database tables: pages, menuItems, landingPageSections, contentBlocks, headerConfig, footerConfig
-  - Enhanced admin panel with 5 new specialized managers
-  - All new PRD requirements from updated document successfully implemented
-- June 28, 2025. Complete database implementation and seeding system:
-  - Fixed admin sidebar layout issues with proper flexbox structure and responsive design
-  - Verified all 22 database tables are properly created and functional
-  - Implemented comprehensive seeding system with 3 specialized scripts:
-    - seed.ts: Complete database population with realistic church data (67 total records)
-    - reset-demo-data.ts: Updates demo content with fresh seasonal data
-    - check-database.ts: Comprehensive database health and integrity verification
-  - All database tables populated with authentic Portuguese church content:
-    - Admin user (username: admin, password: admin123)
-    - 3 hero slides, 3 testimonials, 3 messages, 3 events, 3 videos
-    - Complete about content (vision, mission, beliefs)
-    - Service schedules, site settings, donation campaigns
-    - Blog posts, newsletter subscribers, event registrations
-    - Dynamic pages, menu items, landing page sections
-    - Content blocks library, header/footer configurations
-  - Database performance verified (115ms query time - Good performance)
-  - All PRD requirements from original document fully implemented and tested
-  - Created comprehensive documentation in scripts/README.md
-- June 28, 2025. Migration to Replit and complete menu structure implementation:
-  - Successfully migrated project from Replit Agent to standard Replit environment
-  - Configured PostgreSQL database with all required environment variables
-  - Implemented comprehensive menu structure with 62 total items (11 main + 51 submenus)
-  - Created update-complete-menu-structure.ts script for menu management
-  - All menus organized by categories: Sobre, Ministérios, Cultos, Ensinos, Eventos, Mídia, Contribuições, Comunidade, Contato
-  - Menu structure includes proper hierarchical organization with parent-child relationships
-  - All menu items properly configured with URLs, icons, and active status
-- June 28, 2025. Complete page creation and admin sidebar optimization:
-  - Created all missing pages for menu navigation (25 total pages in database)
-  - Implemented pages: Ministério, Cremos, Presidente, Ensino Audio/Video, Plataforma Ensino, Eventos-Blogs
-  - Updated seed script to include all real pages with proper metadata and SEO
-  - Reorganized admin sidebar eliminating redundancies and improving UX:
-    - Grouped related items into collapsible categories (Gestão Conteúdo, Design, Engajamento, Financeiro, Análises)
-    - Eliminated duplicate items (Conteúdo vs Gestor Conteúdo)
-    - Implemented hierarchical navigation with expand/collapse functionality
-  - All menu navigation now connects to functional pages with real content
-
-- June 30, 2025. Complete separation of Events and Blog systems:
-  - Created dedicated Events page (/events) with calendar functionality, registration links, and attendance tracking
-  - Created dedicated Blog page (/blog) with article management, featured posts, categories, and newsletter integration
-  - Implemented separate BlogManager in admin panel with comprehensive CRUD operations, filtering, and publishing controls
-  - Updated navigation header with separate menu items for Events and Blog
-  - Blog supports 10 predefined categories: Mensagem Pastoral, Ensino Bíblico, Reflexão Espiritual, etc.
-  - Events include detailed information: date/time, location, capacity, registration status
-  - Both systems now managed independently with distinct workflows as requested
-
-- June 30, 2025. Advanced Page Builder Implementation:
-  - Created comprehensive visual page builder similar to Elementor/WordPress builders
-  - Implemented drag-and-drop functionality for 25+ widget types across 6 categories:
-    * Basic Elements: Título, Texto, Botão, Imagem, Container, Colunas, Seção
-    * Content Elements: Hero Banner, Testemunho, Card, Galeria
-    * Forms: Formulário Contato, Newsletter, Pedido de Oração
-    * Media: Vídeo, Áudio, YouTube
-    * Church Specific: Horários Cultos, Mensagem Pastor, Lista Eventos, Widget Doação, Versículo, Transmissão
-    * Advanced: Mapa, Countdown, Feed Social, Avaliação
-  - Built advanced page manager with three view modes: List, Builder, Preview
-  - Added responsive preview with desktop/tablet/mobile device simulation
-  - Implemented visual properties panel for styling elements (padding, margin, colors)
-  - Created undo/redo history system for page building
-  - Enhanced rich text editor with alignment controls, image insertion, and table creation
-  - Fixed TypeScript issues and improved form validation throughout system
-
-- July 05, 2025. Enhanced Landing Page Management System:
-  - Implemented comprehensive landing page management with full drag-and-drop functionality
-  - Created enhanced Landing Page Manager with @dnd-kit for real drag-and-drop reordering
-  - Added visual section management with icons, descriptions, and status indicators
-  - Replaced static homepage with dynamic section-based system from database
-  - Added Events and Blog sections to landing page with dedicated components
-  - Implemented 12 section types: Hero, About, Services, Messages, Events, Blog, Testimonials, Bible Verse, Live Streaming, Social Media, Newsletter, Custom
-  - Created visual section renderer that dynamically loads appropriate components
-  - Enhanced admin interface with improved UX for section management
-  - Added comprehensive section configuration with JSON-based content settings
-  - Updated homepage to render sections dynamically based on database configuration
-  - Successfully migrated from static layout to fully configurable landing page system
-
-- July 06, 2025. Advanced Visual Page Builder Implementation:
-  - Successfully migrated project from Replit Agent to Replit environment
-  - Fixed database connectivity issues and seeded with complete Portuguese church content
-  - Created comprehensive Enhanced Visual Editor with advanced drag-and-drop functionality
-  - Implemented sophisticated widget categories: Basic, Content, Church, Forms, Media, Advanced
-  - Added professional color picker component with preset colors and transparency options
-  - Built enhanced rich text editor with toolbar, formatting options, and preview mode
-  - Created page templates system with 8 pre-built church templates (landing, about, events, contact, blog, donation, ministries, blank)
-  - Integrated responsive device preview (desktop, tablet, mobile) in visual editor
-  - Added advanced styling controls: colors, typography, spacing, layout, flexbox, positioning
-  - Implemented undo/redo history system for visual editing
-  - Created sortable elements with visual controls (move, duplicate, delete)
-  - Added grid overlay and snap-to-grid functionality for precise positioning
-  - Enhanced properties panel with tabbed interface (Content, Style, Layout)
-  - All visual editing features fully functional with real-time preview and intuitive UI
-
-- July 06, 2025. Complete PRD Analysis and Implementation Assessment:
-  - Conducted comprehensive analysis of original PRD requirements vs. current implementation
-  - Created detailed PRD_UPDATED_ANALYSIS.md document with complete feature comparison
-  - Verified 95% completion rate for core requirements and 100% for advanced features
-  - Confirmed system significantly exceeds original specifications with 25+ widget types, 15+ specialized managers
-  - Documented 22 database tables, 50+ API endpoints, and comprehensive admin dashboard
-  - Analyzed 62 menu items with hierarchical structure and 25+ functional pages
-  - Verified complete implementation of: Landing page management, Page builder, Menu system, Content management, Events, Blog, Donations, Videos, Social media, Testimonials, Analytics
-  - Identified minor pending items: Payment gateway integration, External API keys, Cloud storage setup
-  - Confirmed project ready for production deployment with professional-grade architecture
-
-- July 06, 2025. Enhanced PRD Analysis and Implementation Roadmap:
-  - Analyzed updated PRD requirements with enhanced features (30+ widgets, AI assistance, multilingual support)
-  - Created comprehensive TODO_IMPLEMENTATION_ROADMAP.md with sprint planning
-  - Current status: 85% core features complete, 60% enhanced features complete
-  - Identified critical production blockers: Payment gateway, Cloud storage, External API integration
-  - Planned 4-phase implementation: Production Ready (2-3 weeks), Enhanced Features (3-4 weeks), Advanced Features (4-6 weeks), Polish & Scale (2-3 weeks)
-  - Ready to begin Phase 1 implementation focusing on production-critical features
-
-- July 06, 2025. Complete Production Integration Implementation:
-  - Successfully completed all critical production integrations to 100% functionality
-  - Stripe Payment Integration: Payment intents working, €10.00 test payments successful, webhook handling configured
-  - Cloudinary Media Management: File uploads functional (10MB max), image optimization and CDN delivery, real-time transformations
-  - YouTube API Integration: Live video data retrieval, channel integration working, real-time video feed updates
-  - All external API integrations tested and operational
-  - System status upgraded to 100% production ready - all major integrations complete and functional
-  - Updated TODO_IMPLEMENTATION_ROADMAP.md to reflect completion of Phase 1 implementation
-  - Church CMS now exceeds typical WordPress/Elementor functionality with full Portuguese content and professional features
+This project is a comprehensive Church Content Management System (CMS) designed to manage all website content, sessions, and integrations for a church. It features a public-facing frontend for visitors and a full-featured admin panel for content management. The system supports dynamic page building, extensive content management, event and blog systems, and financial management, aiming to provide a professional-grade platform exceeding typical CMS functionalities.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+The application is built with a full-stack architecture:
+
+-   **Frontend**: React 18 with TypeScript (Vite, shadcn/ui, Tailwind CSS, Wouter, TanStack Query, React Hook Form, Zod, Framer Motion).
+-   **Backend**: Express.js server with TypeScript.
+-   **Database**: PostgreSQL with Drizzle ORM.
+
+**Key Architectural Decisions:**
+
+-   **UI/UX**: Modular React components, Tailwind CSS with a custom church theme (gold, purple, orange), shadcn/ui for consistent design, Framer Motion for animations, and a mobile-first responsive design.
+-   **Backend API**: RESTful endpoints, Drizzle ORM for type-safe database operations, centralized error handling, and shared TypeScript schemas.
+-   **Content Management**: Robust CRUD operations for various content types including users, hero slides, about content, service schedules, messages, testimonials, Bible verses, and site settings.
+-   **Dynamic Content**: Features dynamic page management with a visual page builder (similar to Elementor), a dynamic menu system, a landing page manager with drag-and-drop sections, and a content block library.
+-   **Specialized Managers**: Includes dedicated managers for social media, streaming, newsletters, donations, events, and blogs within the admin panel.
+-   **Database Schema**: Comprises 22 tables to manage entities such as pages, menu items, landing page sections, content blocks, header/footer configurations, and more.
+-   **Visual Editor**: Advanced drag-and-drop visual editor with widget categories, a professional color picker, rich text editing, page templates, responsive device previews, and advanced styling controls.
+
+## External Dependencies
+
+-   **@neondatabase/serverless**: Serverless PostgreSQL database connection.
+-   **Drizzle ORM**: Type-safe database operations and migrations.
+-   **TanStack Query**: Server state management and caching.
+-   **shadcn/ui**: Pre-built accessible UI components.
+-   **Framer Motion**: Animation library for enhanced user experience.
+-   **React Hook Form**: Form state management and validation.
+-   **Zod**: Runtime type validation and schema parsing.
+-   **Stripe**: Payment gateway integration for donations.
+-   **Cloudinary**: Media management for file uploads, image optimization, and CDN delivery.
+-   **YouTube API**: Integration for live video data retrieval and channel integration.
