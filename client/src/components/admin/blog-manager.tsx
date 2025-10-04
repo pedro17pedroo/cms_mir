@@ -48,7 +48,8 @@ export default function BlogManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: InsertBlogPost) => apiRequest("/api/blog-posts", "POST", data),
+    mutationFn: (data: InsertBlogPost) => 
+      apiRequest("/api/blog-posts", { method: "POST", body: JSON.stringify(data) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
       setIsDialogOpen(false);
@@ -62,7 +63,7 @@ export default function BlogManager() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, ...data }: InsertBlogPost & { id: number }) =>
-      apiRequest(`/api/blog-posts/${id}`, "PATCH", data),
+      apiRequest(`/api/blog-posts/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
       setIsDialogOpen(false);
@@ -75,7 +76,7 @@ export default function BlogManager() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/blog-posts/${id}`, "DELETE"),
+    mutationFn: (id: number) => apiRequest(`/api/blog-posts/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
       toast({ title: "Artigo removido com sucesso!" });
