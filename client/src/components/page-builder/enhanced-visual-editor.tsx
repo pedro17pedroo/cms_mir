@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { 
   DndContext, 
   closestCenter,
@@ -29,6 +30,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PageTemplates from "./page-templates";
 import EnhancedRichTextEditor from "./enhanced-rich-text-editor";
 import { Badge } from "@/components/ui/badge";
@@ -166,7 +168,9 @@ const widgetCategories = {
         defaultProps: {
           text: "Novo Título",
           level: 2,
-          align: "left"
+          align: "left",
+          hasLink: false,
+          url: ""
         },
         defaultStyles: {
           fontSize: "2rem",
@@ -284,7 +288,8 @@ const widgetCategories = {
           subtitle: "Junte-se a nós em adoração e comunhão",
           buttonText: "Saiba Mais",
           buttonUrl: "#",
-          backgroundImage: ""
+          backgroundImage: "",
+          height: "400px"
         },
         defaultStyles: {
           padding: "4rem 2rem",
@@ -292,7 +297,8 @@ const widgetCategories = {
           color: "white",
           textAlign: "center",
           backgroundSize: "cover",
-          backgroundPosition: "center"
+          backgroundPosition: "center",
+          height: "400px"
         }
       },
       {
@@ -654,6 +660,12 @@ interface EnhancedVisualEditorProps {
   onCancel: () => void;
 }
 
+// Helper function to get all available widgets
+const getAllWidgets = (): Widget[] => {
+  return Object.values(widgetCategories as any)
+    .flatMap((cat: any) => cat.widgets);
+};
+
 export default function EnhancedVisualEditor({ initialContent, onSave, onCancel }: EnhancedVisualEditorProps) {
   const [elements, setElements] = useState<PageElement[]>([]);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -736,9 +748,7 @@ export default function EnhancedVisualEditor({ initialContent, onSave, onCancel 
 
     // Adding new widget
     if (draggedWidget) {
-      const widget = Object.values(widgetCategories)
-        .flatMap(cat => cat.widgets)
-        .find(w => w.id === draggedWidget);
+      const widget = getAllWidgets().find(w => w.id === draggedWidget);
       
       if (widget) {
         const newElement: PageElement = {
@@ -860,8 +870,8 @@ export default function EnhancedVisualEditor({ initialContent, onSave, onCancel 
 
   // Render element preview
   const renderElement = (element: PageElement) => {
-    const combinedStyles = {
-      ...element.styles,
+    const combinedStyles: React.CSSProperties = {
+      ...(element.styles as React.CSSProperties),
       outline: selectedElement === element.id ? "2px solid #3b82f6" : "none",
       outlineOffset: selectedElement === element.id ? "2px" : "0"
     };
@@ -871,12 +881,19 @@ export default function EnhancedVisualEditor({ initialContent, onSave, onCancel 
     switch (element.type) {
       case "heading":
         const HeadingTag = `h${element.props.level || 2}` as keyof JSX.IntrinsicElements;
+        const headingContent = element.props.hasLink && element.props.url ? (
+          <a href={element.props.url} className="hover:underline">
+            {element.props.text}
+          </a>
+        ) : (
+          element.props.text
+        );
         return (
           <HeadingTag 
             className={baseClasses}
             style={combinedStyles}
           >
-            {element.props.text}
+            {headingContent}
           </HeadingTag>
         );
       
@@ -1275,6 +1292,91 @@ function WidgetItem({ widget, onDragStart }: { widget: any; onDragStart: () => v
   );
 }
 
+// URL Selector Component - for selecting between custom URL or existing page
+interface URLSelectorProps {
+  value: string;
+  onChange: (value: string) => void;
+  urlType?: string;
+  onUrlTypeChange?: (type: string) => void;
+  label?: string;
+}
+
+function URLSelector({ value, onChange, urlType, onUrlTypeChange, label = "URL" }: URLSelectorProps) {
+  const { data: pages, isLoading } = useQuery<any[]>({
+    queryKey: ['/api/pages'],
+  });
+
+  const currentUrlType = urlType || (value && value.startsWith('/') && !value.startsWith('http') ? 'page' : 'custom');
+
+  const handleUrlTypeChange = (type: string) => {
+    if (onUrlTypeChange) {
+      onUrlTypeChange(type);
+    }
+    if (type === 'page') {
+      onChange('');
+    }
+  };
+
+  const handlePageSelect = (pageSlug: string) => {
+    onChange(`/${pageSlug}`);
+  };
+
+  const publishedPages = pages?.filter(page => page.isPublished) || [];
+
+  return (
+    <div className="space-y-3">
+      <Label>{label}</Label>
+      <RadioGroup
+        value={currentUrlType}
+        onValueChange={handleUrlTypeChange}
+        className="flex flex-col space-y-2"
+        data-testid="url-type-selector"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="custom" id="url-custom" data-testid="radio-url-custom" />
+          <Label htmlFor="url-custom" className="font-normal cursor-pointer">
+            URL Personalizada
+          </Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="page" id="url-page" data-testid="radio-url-page" />
+          <Label htmlFor="url-page" className="font-normal cursor-pointer">
+            Selecionar Página Existente
+          </Label>
+        </div>
+      </RadioGroup>
+
+      {currentUrlType === 'custom' && (
+        <Input
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://... ou /caminho"
+          data-testid="input-custom-url"
+        />
+      )}
+
+      {currentUrlType === 'page' && (
+        <Select
+          value={value.startsWith('/') ? value.substring(1) : value}
+          onValueChange={handlePageSelect}
+          disabled={isLoading || publishedPages.length === 0}
+        >
+          <SelectTrigger data-testid="select-page">
+            <SelectValue placeholder={isLoading ? "Carregando..." : publishedPages.length === 0 ? "Nenhuma página publicada" : "Selecione uma página"} />
+          </SelectTrigger>
+          <SelectContent>
+            {publishedPages.map((page) => (
+              <SelectItem key={page.id} value={page.slug} data-testid={`page-option-${page.slug}`}>
+                {page.title} ({page.slug})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </div>
+  );
+}
+
 // Enhanced Properties Panel Component
 function EnhancedPropertiesPanel({ 
   element, 
@@ -1333,6 +1435,7 @@ function EnhancedPropertiesPanel({
                       value={element.props.text || ""}
                       onChange={(e) => handlePropChange("text", e.target.value)}
                       placeholder="Digite o título"
+                      data-testid="input-heading-text"
                     />
                   </div>
                   <div>
@@ -1341,7 +1444,7 @@ function EnhancedPropertiesPanel({
                       value={element.props.level?.toString() || "2"}
                       onValueChange={(value) => handlePropChange("level", parseInt(value))}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger data-testid="select-heading-level">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1354,6 +1457,26 @@ function EnhancedPropertiesPanel({
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="heading-link"
+                      checked={element.props.hasLink || false}
+                      onCheckedChange={(checked) => handlePropChange("hasLink", checked)}
+                      data-testid="switch-heading-link"
+                    />
+                    <Label htmlFor="heading-link" className="font-normal cursor-pointer">
+                      Adicionar Link
+                    </Label>
+                  </div>
+                  {element.props.hasLink && (
+                    <URLSelector
+                      value={element.props.url || ""}
+                      onChange={(value) => handlePropChange("url", value)}
+                      urlType={element.props.urlType}
+                      onUrlTypeChange={(type) => handlePropChange("urlType", type)}
+                      label="URL do Link"
+                    />
+                  )}
                 </>
               )}
 
@@ -1377,23 +1500,23 @@ function EnhancedPropertiesPanel({
                       value={element.props.text || ""}
                       onChange={(e) => handlePropChange("text", e.target.value)}
                       placeholder="Texto do botão"
+                      data-testid="input-button-text"
                     />
                   </div>
-                  <div>
-                    <Label>URL</Label>
-                    <Input
-                      value={element.props.url || ""}
-                      onChange={(e) => handlePropChange("url", e.target.value)}
-                      placeholder="https://..."
-                    />
-                  </div>
+                  <URLSelector
+                    value={element.props.url || ""}
+                    onChange={(value) => handlePropChange("url", value)}
+                    urlType={element.props.urlType}
+                    onUrlTypeChange={(type) => handlePropChange("urlType", type)}
+                    label="URL"
+                  />
                   <div>
                     <Label>Estilo</Label>
                     <Select
                       value={element.props.style || "primary"}
                       onValueChange={(value) => handlePropChange("style", value)}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger data-testid="select-button-style">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1436,6 +1559,7 @@ function EnhancedPropertiesPanel({
                       value={element.props.title || ""}
                       onChange={(e) => handlePropChange("title", e.target.value)}
                       placeholder="Título principal"
+                      data-testid="input-hero-title"
                     />
                   </div>
                   <div>
@@ -1444,6 +1568,7 @@ function EnhancedPropertiesPanel({
                       value={element.props.subtitle || ""}
                       onChange={(e) => handlePropChange("subtitle", e.target.value)}
                       placeholder="Subtítulo"
+                      data-testid="input-hero-subtitle"
                     />
                   </div>
                   <div>
@@ -1452,14 +1577,23 @@ function EnhancedPropertiesPanel({
                       value={element.props.buttonText || ""}
                       onChange={(e) => handlePropChange("buttonText", e.target.value)}
                       placeholder="Texto do botão"
+                      data-testid="input-hero-button-text"
                     />
                   </div>
+                  <URLSelector
+                    value={element.props.buttonUrl || ""}
+                    onChange={(value) => handlePropChange("buttonUrl", value)}
+                    urlType={element.props.buttonUrlType}
+                    onUrlTypeChange={(type) => handlePropChange("buttonUrlType", type)}
+                    label="URL do Botão"
+                  />
                   <div>
                     <Label>Imagem de Fundo</Label>
                     <Input
                       value={element.props.backgroundImage || ""}
                       onChange={(e) => handlePropChange("backgroundImage", e.target.value)}
                       placeholder="URL da imagem"
+                      data-testid="input-hero-background"
                     />
                   </div>
                 </>
@@ -1604,7 +1738,7 @@ function EnhancedPropertiesPanel({
                 <Label>Bordas Arredondadas</Label>
                 <div className="space-y-2">
                   <Slider
-                    value={[parseInt(element.styles.borderRadius) || 0]}
+                    value={[parseInt(element.styles.borderRadius || "0") || 0]}
                     onValueChange={([value]) => handleStyleChange("borderRadius", `${value}px`)}
                     min={0}
                     max={50}
@@ -1621,14 +1755,14 @@ function EnhancedPropertiesPanel({
                 <Label>Opacidade</Label>
                 <div className="space-y-2">
                   <Slider
-                    value={[parseFloat(element.styles.opacity) * 100 || 100]}
+                    value={[parseFloat(element.styles.opacity || "1") * 100 || 100]}
                     onValueChange={([value]) => handleStyleChange("opacity", (value / 100).toString())}
                     min={0}
                     max={100}
                     step={5}
                   />
                   <div className="text-xs text-gray-500 text-center">
-                    {Math.round((parseFloat(element.styles.opacity) || 1) * 100)}%
+                    {Math.round((parseFloat(element.styles.opacity || "1") || 1) * 100)}%
                   </div>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
@@ -223,6 +223,7 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [urlType, setUrlType] = useState<"custom" | "page">("custom");
   const queryClient = useQueryClient();
 
   const sensors = useSensors(
@@ -429,6 +430,15 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
 
   const handleEdit = (item: MenuItem) => {
     setEditingItem(item);
+    
+    const urlWithoutSlash = item.url.startsWith("/") ? item.url.substring(1) : "";
+    const matchingPage = pages.find(page => page.slug === urlWithoutSlash);
+    const isPageUrl = item.url.startsWith("/") && 
+                      !item.url.includes("://") && 
+                      item.url.split("/").filter(Boolean).length === 1 &&
+                      matchingPage;
+    
+    setUrlType(isPageUrl ? "page" : "custom");
     form.reset({
       title: item.title,
       url: item.url,
@@ -442,6 +452,7 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
 
   const handleNewItem = () => {
     setEditingItem(null);
+    setUrlType("custom");
     form.reset({
       title: "",
       url: "",
@@ -459,6 +470,12 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
       data: { isActive: !item.isActive }
     });
   };
+
+  useEffect(() => {
+    if (urlType === "page" && form.watch("url") && !form.watch("url").startsWith("/")) {
+      form.setValue("url", "", { shouldValidate: true });
+    }
+  }, [urlType]);
 
   const organizedMenuItems = organizeMenuItems(menuItems);
   const parentMenuItems = menuItems.filter(item => !item.parentId);
@@ -556,34 +573,96 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
                   </DialogHeader>
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="title"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Título</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ex: Início" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="url"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ex: /" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Título</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Ex: Início" 
+                                {...field} 
+                                data-testid="input-menu-title"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="space-y-4">
+                        <div>
+                          <FormLabel>Tipo de URL</FormLabel>
+                          <Select 
+                            value={urlType} 
+                            onValueChange={(value: "custom" | "page") => setUrlType(value)}
+                            data-testid="select-url-type"
+                          >
+                            <SelectTrigger data-testid="trigger-url-type">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="custom" data-testid="option-url-custom">
+                                URL Personalizada
+                              </SelectItem>
+                              <SelectItem value="page" data-testid="option-url-page">
+                                Selecionar Página Existente
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {urlType === "page" ? (
+                          <div className="space-y-2">
+                            <FormLabel>Página</FormLabel>
+                            <Select
+                              value={form.watch("url").startsWith("/") ? form.watch("url").substring(1) : ""}
+                              onValueChange={(slug) => {
+                                form.setValue("url", `/${slug}`, { shouldValidate: true, shouldDirty: true });
+                              }}
+                              data-testid="select-page"
+                            >
+                              <SelectTrigger data-testid="trigger-page-selector">
+                                <SelectValue placeholder="Selecione uma página" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {pages.filter(page => page.isPublished).map((page) => (
+                                  <SelectItem 
+                                    key={page.id} 
+                                    value={page.slug}
+                                    data-testid={`option-page-${page.slug}`}
+                                  >
+                                    {page.title} ({page.slug})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {form.watch("url") && (
+                              <p className="text-sm text-gray-500" data-testid="text-selected-url">
+                                URL gerada: {form.watch("url")}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <FormField
+                            control={form.control}
+                            name="url"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>URL Personalizada</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Ex: / ou https://exemplo.com" 
+                                    {...field} 
+                                    data-testid="input-custom-url"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
@@ -594,14 +673,22 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
                             <FormItem>
                               <FormLabel>Menu Pai (Opcional)</FormLabel>
                               <FormControl>
-                                <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} value={field.value?.toString() || ""}>
-                                  <SelectTrigger>
+                                <Select 
+                                  onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
+                                  value={field.value?.toString() || ""}
+                                  data-testid="select-parent-menu"
+                                >
+                                  <SelectTrigger data-testid="trigger-parent-menu">
                                     <SelectValue placeholder="Menu principal" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="">Menu principal</SelectItem>
+                                    <SelectItem value="" data-testid="option-parent-none">Menu principal</SelectItem>
                                     {parentMenuItems.map((parent) => (
-                                      <SelectItem key={parent.id} value={parent.id.toString()}>
+                                      <SelectItem 
+                                        key={parent.id} 
+                                        value={parent.id.toString()}
+                                        data-testid={`option-parent-${parent.id}`}
+                                      >
                                         {parent.title}
                                       </SelectItem>
                                     ))}
@@ -620,18 +707,22 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
                             <FormItem>
                               <FormLabel>Ícone</FormLabel>
                               <FormControl>
-                                <Select onValueChange={field.onChange} value={field.value || ""}>
-                                  <SelectTrigger>
+                                <Select 
+                                  onValueChange={field.onChange} 
+                                  value={field.value || ""}
+                                  data-testid="select-icon"
+                                >
+                                  <SelectTrigger data-testid="trigger-icon">
                                     <SelectValue placeholder="Selecione um ícone" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="home">🏠 Início</SelectItem>
-                                    <SelectItem value="users">👥 Sobre</SelectItem>
-                                    <SelectItem value="calendar">📅 Eventos</SelectItem>
-                                    <SelectItem value="message">💬 Mensagens</SelectItem>
-                                    <SelectItem value="book">📖 Blog</SelectItem>
-                                    <SelectItem value="heart">❤️ Testemunhos</SelectItem>
-                                    <SelectItem value="settings">⚙️ Configurações</SelectItem>
+                                    <SelectItem value="home" data-testid="option-icon-home">🏠 Início</SelectItem>
+                                    <SelectItem value="users" data-testid="option-icon-users">👥 Sobre</SelectItem>
+                                    <SelectItem value="calendar" data-testid="option-icon-calendar">📅 Eventos</SelectItem>
+                                    <SelectItem value="message" data-testid="option-icon-message">💬 Mensagens</SelectItem>
+                                    <SelectItem value="book" data-testid="option-icon-book">📖 Blog</SelectItem>
+                                    <SelectItem value="heart" data-testid="option-icon-heart">❤️ Testemunhos</SelectItem>
+                                    <SelectItem value="settings" data-testid="option-icon-settings">⚙️ Configurações</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </FormControl>
@@ -656,6 +747,7 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
                               <Switch
                                 checked={Boolean(field.value)}
                                 onCheckedChange={field.onChange}
+                                data-testid="switch-menu-active"
                               />
                             </FormControl>
                           </FormItem>
@@ -663,13 +755,19 @@ export default function EnhancedMenuManager({}: EnhancedMenuManagerProps) {
                       />
 
                       <div className="flex justify-end space-x-2">
-                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => setIsDialogOpen(false)}
+                          data-testid="button-cancel-menu"
+                        >
                           Cancelar
                         </Button>
                         <Button 
                           type="submit" 
                           disabled={createMenuItemMutation.isPending || updateMenuItemMutation.isPending}
                           className="bg-purple-600 hover:bg-purple-700"
+                          data-testid="button-save-menu"
                         >
                           {createMenuItemMutation.isPending || updateMenuItemMutation.isPending ? "Salvando..." : "Salvar"}
                         </Button>
